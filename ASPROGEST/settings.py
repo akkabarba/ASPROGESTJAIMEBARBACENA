@@ -39,12 +39,10 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
     "https://asprogestjaimebarbacena.onrender.com", 
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
     "https://asprogestjaimebarbacena.onrender.com",  
 ]
 
