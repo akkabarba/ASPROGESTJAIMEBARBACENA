@@ -15,7 +15,7 @@ function App() {
   const cargarUsuario = async () => {
     try {
       const token = await refreshTokenIfNeeded();
-      const res = await fetch(`${API_BASE}/api/whoami/`, {
+      const res = await fetch(`${API_BASE}/whoami/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
