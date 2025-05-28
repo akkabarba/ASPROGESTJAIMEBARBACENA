@@ -1,0 +1,42 @@
+# Entorno virtual
+env/
+venv/
+ENV/
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Archivos de configuración de entorno y compilaciones
+*.db
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.mo
+*.swp
+
+# Archivos de usuario de VS Code
+.vscode/
+
+# Archivos y carpetas de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de configuración de JetBrains / PyCharm
+.idea/
+
+# Archivos de migración de Django (opcionales si quieres ignorarlos)
+# */migrations/*.py
+# */migrations/*.pyc
+
+# Archivos de subida
+media/
+uploads/
+
+# Archivos de configuración local
+.env
+.env.*
+
+# Compilados y cachés de Django
+*.~undo-tree~
