@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 import dj_database_url
+from corsheaders.defaults import default_headers
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -47,6 +49,11 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'Authorization',
+    'Content-Type',
+]
 
 ROOT_URLCONF = 'ASPROGEST.urls'
 
