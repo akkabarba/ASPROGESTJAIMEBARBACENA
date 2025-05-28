@@ -9,7 +9,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-@(tooz4f@fb@tt#e*du^u
 DEBUG = True
 
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'asporgest-jaime.onrender.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'asprogestjaimebarbacena.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -36,9 +36,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "https://asporgest-jaime.onrender.com"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "asprogestjaimebarbacena.onrender.com"]
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "https://asporgest-jaime.onrender.com"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "asprogestjaimebarbacena.onrender.com"]
 
 ROOT_URLCONF = 'ASPROGEST.urls'
 
