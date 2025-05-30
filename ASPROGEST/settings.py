@@ -2,6 +2,10 @@ import os
 from pathlib import Path
 import dj_database_url
 from corsheaders.defaults import default_headers
+from dotenv import load_dotenv
+
+# Carga el archivo .env
+load_dotenv()
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -75,17 +79,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ASPROGEST.wsgi.application'
 
-DATABASES = {}
-if os.environ.get('RENDER'):
-    DATABASES['default'] = dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True 
     )
-else:
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+}
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
