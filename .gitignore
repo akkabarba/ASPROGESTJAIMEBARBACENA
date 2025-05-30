@@ -40,3 +40,5 @@ uploads/
 
 # Compilados y cachés de Django
 *.~undo-tree~
+
+staticfiles/
