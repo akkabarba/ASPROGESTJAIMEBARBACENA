@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from .models import Incidencia
 from .serializers import IncidenciaSerializer, CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.pagination import PageNumberPagination
 
 
 
@@ -40,8 +41,30 @@ def crear_usuario_api(request):
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def listar_usuarios_api(request):
-    usuarios = User.objects.all().values('id', 'username', 'is_superuser', 'is_active', 'date_joined')
-    return Response(list(usuarios))
+    paginator = PageNumberPagination()
+    paginator.page_size = 5
+    usuarios = User.objects.all().order_by('id').values('id', 'username', 'email', 'is_superuser', 'is_active', 'date_joined')
+    result_page = paginator.paginate_queryset(usuarios, request)
+    return paginator.get_paginated_response(result_page)
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def cambiar_password_api(request):
+    user_id = request.data.get('user_id')
+    new_password = request.data.get('new_password')
+    
+    if not user_id or not new_password:
+        return Response({'error': 'Datos incompletos'}, status=400)
+
+    try:
+        usuario = User.objects.get(id=user_id)
+        usuario.set_password(new_password)
+        usuario.save()
+        return Response({'success': 'Contraseña actualizada'})
+    except User.DoesNotExist:
+        return Response({'error': 'Usuario no encontrado'}, status=404)
+
+
 
 # ==========================
 # API WHOAMI (identidad)
