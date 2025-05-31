@@ -29,7 +29,7 @@ function Administracion() {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
-      setUsuarios(data);
+      setUsuarios(data.results);
     } catch {
       setError('Error al cargar usuarios');
     }
@@ -42,7 +42,7 @@ function Administracion() {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
-      setIncidencias(data);
+      setIncidencias(data.results);
       const nuevasIncidencias = data.filter((i) => i.estado === 'nueva').length;
       setNuevas(nuevasIncidencias);
     } catch (err) {
