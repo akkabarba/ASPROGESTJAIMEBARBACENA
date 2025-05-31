@@ -43,7 +43,7 @@ function Administracion() {
       });
       const data = await res.json();
       setIncidencias(data.results);
-      const nuevasIncidencias = data.filter((i) => i.estado === 'nueva').length;
+      const nuevasIncidencias = (data.results || []).filter(i => i.estado === 'nueva').length;
       setNuevas(nuevasIncidencias);
     } catch (err) {
       console.error(err);

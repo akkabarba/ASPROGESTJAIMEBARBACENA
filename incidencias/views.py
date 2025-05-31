@@ -41,11 +41,29 @@ def crear_usuario_api(request):
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def listar_usuarios_api(request):
-    paginator = PageNumberPagination()
-    paginator.page_size = 5
-    usuarios = User.objects.all().order_by('id').values('id', 'username', 'email', 'is_superuser', 'is_active', 'date_joined')
-    result_page = paginator.paginate_queryset(usuarios, request)
-    return paginator.get_paginated_response(result_page)
+    page = int(request.GET.get('page', 1))
+    size = 5
+
+    usuarios = User.objects.all().order_by('-date_joined')
+    total = usuarios.count()
+
+    start = (page - 1) * size
+    end = start + size
+    usuarios_pagina = usuarios[start:end]
+
+    data = [
+        {
+            'id': u.id, 'username': u.username, 'email': u.email,
+            'is_superuser': u.is_superuser, 'is_active': u.is_active, 
+            'date_joined': u.date_joined
+        } 
+        for u in usuarios_pagina
+    ]
+
+    return Response({
+        'count': total,
+        'results': data
+    })
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
@@ -83,9 +101,13 @@ def whoami(request):
 # API REST INCIDENCIAS
 # ==========================
 
+class IncidenciaPagination(PageNumberPagination):
+    page_size = 5
+
 class IncidenciaViewSet(ModelViewSet):
     serializer_class = IncidenciaSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = IncidenciaPagination
 
     def get_queryset(self):
         if self.request.user.is_superuser:
