@@ -124,10 +124,6 @@ function Administracion() {
     }
   };
 
-  const separarPorEstado = (estado) =>
-    incidencias
-      .filter(i => i.estado === estado)
-      .sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
 
   const usuariosPaginados = usuarios.slice((paginaUsuarios - 1) * usuariosPorPagina, paginaUsuarios * usuariosPorPagina);
   const incidenciasPaginadas = incidencias.slice((paginaIncidencias - 1) * incidenciasPorPagina, paginaIncidencias * incidenciasPorPagina);
