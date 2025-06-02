@@ -176,7 +176,7 @@ const renderCamposTipo = () => {
 
       <form onSubmit={handleSubmit}>
         <label>Centro:</label>
-        <input name="centro" value={form.centro} onChange={handleChange} className="form-control mb-2" />
+        <select name="centro" value={form.centro} onChange={handleChange} className="form-control mb-2" />
 
         <label>Fecha:</label>
         <input type="date" name="fecha" value={form.fecha} onChange={handleChange} className="form-control mb-2" />
