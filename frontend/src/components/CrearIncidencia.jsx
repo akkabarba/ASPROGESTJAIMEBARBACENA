@@ -4,8 +4,13 @@ import API_BASE from '../utils/config';
 
 function CrearIncidencia() {
   const [form, setForm] = useState({
-    centro: '', fecha: '', urgencia: false, prioridad: 'Media', relativa: '',
-    descripcion: '', telefono_contacto: '',
+    centro: '',
+    fecha: '',
+    urgencia: false,
+    prioridad: 'Media',
+    relativa: '',
+    descripcion: '',
+    telefono_contacto: '',
 
     // Tipo 1
     imei: '', tipo_incidencia_telefono: '',
@@ -40,7 +45,10 @@ function CrearIncidencia() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    setForm(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -52,7 +60,10 @@ function CrearIncidencia() {
       const token = await refreshTokenIfNeeded();
       const res = await fetch(`${API_BASE}/incidencias/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify(form)
       });
 
@@ -63,7 +74,7 @@ function CrearIncidencia() {
         const data = await res.json();
         setError(data.detail || 'Error al crear la incidencia');
       }
-    } catch {
+    } catch (err) {
       setError('Error de conexión con el servidor');
     }
   };
@@ -110,7 +121,7 @@ function CrearIncidencia() {
       );
       case '5': return (
         <>
-          <label>Tipo incidencia Impresora</label><input name="tipo_incidencia_impresora" value={form.tipo_incidencia_impresora} onChange={handleChange} className="form-control mb-2" />
+          <label>Tipo incidencia impresora</label><input name="tipo_incidencia_impresora" value={form.tipo_incidencia_impresora} onChange={handleChange} className="form-control mb-2" />
         </>
       );
       case '6': return (
@@ -121,26 +132,32 @@ function CrearIncidencia() {
       );
       case '7': return (
         <>
-          <label>Trabajador</label><input name="trabajador_dispositivo" value={form.trabajador_dispositivo} onChange={handleChange} className="form-control mb-2" />
+          <label>Trabajador dispositivo</label><input name="trabajador_dispositivo" value={form.trabajador_dispositivo} onChange={handleChange} className="form-control mb-2" />
           <label>Contacto</label><input name="contacto_dispositivo" value={form.contacto_dispositivo} onChange={handleChange} className="form-control mb-2" />
           <label>Cuenta</label><input name="cuenta_dispositivo" value={form.cuenta_dispositivo} onChange={handleChange} className="form-control mb-2" />
           <label>Tipo solicitud</label><input name="tipo_solicitud_dispositivo" value={form.tipo_solicitud_dispositivo} onChange={handleChange} className="form-control mb-2" />
-          <label>IMEI</label><input name="imei_personal" value={form.imei_personal} onChange={handleChange} className="form-control mb-2" />
+          <label>IMEI Personal</label><input name="imei_personal" value={form.imei_personal} onChange={handleChange} className="form-control mb-2" />
           <label>Modelo</label><input name="modelo_personal" value={form.modelo_personal} onChange={handleChange} className="form-control mb-2" />
-          <label>Motivo</label><input name="motivo_intervencion" value={form.motivo_intervencion} onChange={handleChange} className="form-control mb-2" />
-          <label>Intervención</label><input name="intervencion_solicitada" value={form.intervencion_solicitada} onChange={handleChange} className="form-control mb-2" />
+          <label>Motivo intervención</label><input name="motivo_intervencion" value={form.motivo_intervencion} onChange={handleChange} className="form-control mb-2" />
+          <label>Intervención solicitada</label><input name="intervencion_solicitada" value={form.intervencion_solicitada} onChange={handleChange} className="form-control mb-2" />
         </>
       );
       case '8': return (
         <>
-          <label>Centro ANIDE</label><input name="centro_anide" value={form.centro_anide} onChange={handleChange} className="form-control mb-2" />
+          <label>Centro Anide</label><input name="centro_anide" value={form.centro_anide} onChange={handleChange} className="form-control mb-2" />
           <label>Puesto trabajo</label><input name="puesto_trabajo" value={form.puesto_trabajo} onChange={handleChange} className="form-control mb-2" />
-          <label>Eliminar nombre</label><input name="eliminar_nombre" value={form.eliminar_nombre} onChange={handleChange} className="form-control mb-2" />
-          <label>Eliminar fecha</label><input type="datetime-local" name="eliminar_fecha" value={form.eliminar_fecha} onChange={handleChange} className="form-control mb-2" />
-          <label><input type="checkbox" name="eliminar_urgente" checked={form.eliminar_urgente} onChange={handleChange} /> Eliminar urgente</label>
-          <label>Otorgar nombre</label><input name="otorgar_nombre" value={form.otorgar_nombre} onChange={handleChange} className="form-control mb-2" />
-          <label>Otorgar fecha</label><input type="datetime-local" name="otorgar_fecha" value={form.otorgar_fecha} onChange={handleChange} className="form-control mb-2" />
-          <label><input type="checkbox" name="otorgar_urgente" checked={form.otorgar_urgente} onChange={handleChange} /> Otorgar urgente</label>
+          <label>Eliminar Nombre</label><input name="eliminar_nombre" value={form.eliminar_nombre} onChange={handleChange} className="form-control mb-2" />
+          <label>Eliminar Fecha</label><input type="datetime-local" name="eliminar_fecha" value={form.eliminar_fecha} onChange={handleChange} className="form-control mb-2" />
+          <div className="form-check mb-2">
+            <input type="checkbox" className="form-check-input" name="eliminar_urgente" checked={form.eliminar_urgente} onChange={handleChange} />
+            <label className="form-check-label">Eliminar urgente</label>
+          </div>
+          <label>Otorgar Nombre</label><input name="otorgar_nombre" value={form.otorgar_nombre} onChange={handleChange} className="form-control mb-2" />
+          <label>Otorgar Fecha</label><input type="datetime-local" name="otorgar_fecha" value={form.otorgar_fecha} onChange={handleChange} className="form-control mb-2" />
+          <div className="form-check mb-2">
+            <input type="checkbox" className="form-check-input" name="otorgar_urgente" checked={form.otorgar_urgente} onChange={handleChange} />
+            <label className="form-check-label">Otorgar urgente</label>
+          </div>
         </>
       );
       default: return null;
@@ -150,6 +167,7 @@ function CrearIncidencia() {
   return (
     <div className="container mt-4">
       <h2>Crear Incidencia</h2>
+
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-danger">{error}</div>}
 
@@ -174,9 +192,9 @@ function CrearIncidencia() {
 
         <label>Fecha</label>
         <input type="date" name="fecha" value={form.fecha} onChange={handleChange} className="form-control mb-2" />
-        
+
         <div className="form-check mb-2">
-          <input type="checkbox" name="urgencia" checked={form.urgencia} onChange={handleChange} className="form-check-input" />
+          <input type="checkbox" className="form-check-input" name="urgencia" checked={form.urgencia} onChange={handleChange} />
           <label className="form-check-label">¿Urgente?</label>
         </div>
 
@@ -202,7 +220,6 @@ function CrearIncidencia() {
 
         <label>Descripción</label>
         <textarea name="descripcion" value={form.descripcion} onChange={handleChange} className="form-control mb-2" />
-
         <label>Teléfono contacto</label>
         <input name="telefono_contacto" value={form.telefono_contacto} onChange={handleChange} className="form-control mb-2" />
 
