@@ -18,7 +18,7 @@ function ListadoIncidencias({ usuario }) {
 
         if (!res.ok) throw new Error('Error de autenticación');
         const data = await res.json();
-        setIncidencias(data.results || data);  // por si tu API aún no devuelve paginación del backend
+        setIncidencias(data.results || data);
       } catch {
         setError('No se pudieron cargar las incidencias.');
       }
@@ -30,45 +30,61 @@ function ListadoIncidencias({ usuario }) {
   const renderCamposTipo = (inc) => {
     switch (inc.relativa) {
       case '1':
-        return <>
-          <strong>IMEI:</strong> {inc.imei} <br />
-          <strong>Tipo teléfono:</strong> {inc.tipo_incidencia_telefono}
-        </>;
+        return (
+          <>
+            <strong>IMEI:</strong> {inc.imei} <br />
+            <strong>Tipo teléfono:</strong> {inc.tipo_incidencia_telefono}
+          </>
+        );
       case '2':
-        return <>
-          <strong>Número serie:</strong> {inc.numero_serie} <br />
-          <strong>Sesión:</strong> {inc.sesion} <br />
-          <strong>Tipo ordenador:</strong> {inc.tipo_incidencia_ordenador}
-        </>;
+        return (
+          <>
+            <strong>Número serie:</strong> {inc.numero_serie} <br />
+            <strong>Sesión:</strong> {inc.sesion} <br />
+            <strong>Tipo ordenador:</strong> {inc.tipo_incidencia_ordenador}
+          </>
+        );
       case '3':
-        return <>
-          <strong>Tipo internet:</strong> {inc.tipo_incidencia_internet} <br />
-          <strong>Inicio:</strong> {inc.fecha_inicio_incidencia}
-        </>;
+        return (
+          <>
+            <strong>Tipo internet:</strong> {inc.tipo_incidencia_internet} <br />
+            <strong>Inicio:</strong> {inc.fecha_inicio_incidencia}
+          </>
+        );
       case '4':
-        return <>
-          <strong>Cuenta GSuite:</strong> {inc.cuenta_gsuite} <br />
-          <strong>Tipo GSuite:</strong> {inc.tipo_incidencia_gsuite}
-        </>;
+        return (
+          <>
+            <strong>Cuenta GSuite:</strong> {inc.cuenta_gsuite} <br />
+            <strong>Tipo GSuite:</strong> {inc.tipo_incidencia_gsuite}
+          </>
+        );
       case '5':
-        return <>
-        <strong>Tipo impresora:</strong> {inc.tipo_incidencia_impresora};
-        </>;
+        return (
+          <>
+            <strong>Tipo impresora:</strong> {inc.tipo_incidencia_impresora}
+          </>
+        );
       case '6':
-        return <>
-          <strong>Trabajador plataforma:</strong> {inc.trabajador_plataforma} <br />
-          <strong>Tipo plataforma:</strong> {inc.tipo_incidencia_plataforma}
-        </>;
+        return (
+          <>
+            <strong>Trabajador plataforma:</strong> {inc.trabajador_plataforma} <br />
+            <strong>Tipo plataforma:</strong> {inc.tipo_incidencia_plataforma}
+          </>
+        );
       case '7':
-        return <>
-          <strong>Trabajador:</strong> {inc.trabajador_dispositivo} <br />
-          <strong>Modelo:</strong> {inc.modelo_personal}
-        </>;
+        return (
+          <>
+            <strong>Trabajador:</strong> {inc.trabajador_dispositivo} <br />
+            <strong>Modelo:</strong> {inc.modelo_personal}
+          </>
+        );
       case '8':
-        return <>
-          <strong>Centro Anide:</strong> {inc.centro_anide} <br />
-          <strong>Puesto trabajo:</strong> {inc.puesto_trabajo}
-        </>;
+        return (
+          <>
+            <strong>Centro Anide:</strong> {inc.centro_anide} <br />
+            <strong>Puesto trabajo:</strong> {inc.puesto_trabajo}
+          </>
+        );
       default:
         return null;
     }
@@ -87,10 +103,11 @@ function ListadoIncidencias({ usuario }) {
             <h5 className="card-title">{inc.descripcion}</h5>
             <p className="card-text">
               <strong>Centro:</strong> {inc.centro} <br />
-              <strong>Fecha:</strong> {new Date(inc.fecha_creacion).toLocaleString()} <br />
-              <strong>Teléfono:</strong> {inc.telefono_contacto} <br />
+              <strong>Fecha:</strong> {inc.fecha_creacion ? new Date(inc.fecha_creacion).toLocaleString() : ''} <br />
+              <strong>Urgencia:</strong> {inc.urgencia ? 'Sí' : 'No'} <br />
               <strong>Prioridad:</strong> {inc.prioridad} <br />
               <strong>Estado:</strong> {inc.estado} <br />
+              <strong>Teléfono:</strong> {inc.telefono_contacto} <br />
               {renderCamposTipo(inc)}
               {inc.observaciones && (
                 <>

@@ -37,71 +37,52 @@ function GestionarIncidencia({ incidencia, onActualizada }) {
     }
   };
 
-  const formatearFecha = (fecha) => {
-    if (!fecha) return '';
-    return new Date(fecha).toLocaleString();
-  };
-
-  const renderCamposPorTipo = () => {
+  const renderCamposTipo = () => {
     switch (incidencia.relativa) {
-      case '1': return (
-        <>
-          <p><b>IMEI:</b> {incidencia.imei}</p>
-          <p><b>Tipo Incidencia Teléfono:</b> {incidencia.tipo_incidencia_telefono}</p>
-        </>
-      );
-      case '2': return (
-        <>
-          <p><b>Número de Serie:</b> {incidencia.numero_serie}</p>
-          <p><b>Sesión:</b> {incidencia.sesion}</p>
-          <p><b>Tipo Incidencia Ordenador:</b> {incidencia.tipo_incidencia_ordenador}</p>
-        </>
-      );
-      case '3': return (
-        <>
-          <p><b>Tipo Incidencia Internet:</b> {incidencia.tipo_incidencia_internet}</p>
-          <p><b>Fecha Inicio Incidencia:</b> {formatearFecha(incidencia.fecha_inicio_incidencia)}</p>
-        </>
-      );
-      case '4': return (
-        <>
-          <p><b>Cuenta GSuite:</b> {incidencia.cuenta_gsuite}</p>
-          <p><b>Tipo Incidencia GSuite:</b> {incidencia.tipo_incidencia_gsuite}</p>
-        </>
-      );
-      case '5': return (
-        <p><b>Tipo Incidencia Impresora:</b> {incidencia.tipo_incidencia_impresora}</p>
-      );
-      case '6': return (
-        <>
-          <p><b>Trabajador plataforma:</b> {incidencia.trabajador_plataforma}</p>
-          <p><b>Tipo incidencia plataforma:</b> {incidencia.tipo_incidencia_plataforma}</p>
-        </>
-      );
-      case '7': return (
-        <>
-          <p><b>Trabajador dispositivo:</b> {incidencia.trabajador_dispositivo}</p>
-          <p><b>Contacto:</b> {incidencia.contacto_dispositivo}</p>
-          <p><b>Cuenta:</b> {incidencia.cuenta_dispositivo}</p>
-          <p><b>Tipo solicitud:</b> {incidencia.tipo_solicitud_dispositivo}</p>
-          <p><b>IMEI Personal:</b> {incidencia.imei_personal}</p>
-          <p><b>Modelo:</b> {incidencia.modelo_personal}</p>
-          <p><b>Motivo intervención:</b> {incidencia.motivo_intervencion}</p>
-          <p><b>Intervención solicitada:</b> {incidencia.intervencion_solicitada}</p>
-        </>
-      );
-      case '8': return (
-        <>
-          <p><b>Centro Anide:</b> {incidencia.centro_anide}</p>
-          <p><b>Puesto trabajo:</b> {incidencia.puesto_trabajo}</p>
-          <p><b>Eliminar Nombre:</b> {incidencia.eliminar_nombre}</p>
-          <p><b>Eliminar Fecha:</b> {formatearFecha(incidencia.eliminar_fecha)}</p>
-          <p><b>Eliminar Urgente:</b> {incidencia.eliminar_urgente ? 'Sí' : 'No'}</p>
-          <p><b>Otorgar Nombre:</b> {incidencia.otorgar_nombre}</p>
-          <p><b>Otorgar Fecha:</b> {formatearFecha(incidencia.otorgar_fecha)}</p>
-          <p><b>Otorgar Urgente:</b> {incidencia.otorgar_urgente ? 'Sí' : 'No'}</p>
-        </>
-      );
+      case '1': return <>
+        <p><b>IMEI:</b> {incidencia.imei}</p>
+        <p><b>Tipo incidencia teléfono:</b> {incidencia.tipo_incidencia_telefono}</p>
+      </>;
+      case '2': return <>
+        <p><b>Número de serie:</b> {incidencia.numero_serie}</p>
+        <p><b>Sesión:</b> {incidencia.sesion}</p>
+        <p><b>Tipo incidencia ordenador:</b> {incidencia.tipo_incidencia_ordenador}</p>
+      </>;
+      case '3': return <>
+        <p><b>Tipo incidencia Internet:</b> {incidencia.tipo_incidencia_internet}</p>
+        <p><b>Fecha inicio incidencia:</b> {incidencia.fecha_inicio_incidencia}</p>
+      </>;
+      case '4': return <>
+        <p><b>Cuenta GSuite:</b> {incidencia.cuenta_gsuite}</p>
+        <p><b>Tipo incidencia GSuite:</b> {incidencia.tipo_incidencia_gsuite}</p>
+      </>;
+      case '5': return <>
+        <p><b>Tipo incidencia impresora:</b> {incidencia.tipo_incidencia_impresora}</p>
+      </>;
+      case '6': return <>
+        <p><b>Trabajador plataforma:</b> {incidencia.trabajador_plataforma}</p>
+        <p><b>Tipo incidencia plataforma:</b> {incidencia.tipo_incidencia_plataforma}</p>
+      </>;
+      case '7': return <>
+        <p><b>Trabajador:</b> {incidencia.trabajador_dispositivo}</p>
+        <p><b>Contacto:</b> {incidencia.contacto_dispositivo}</p>
+        <p><b>Cuenta:</b> {incidencia.cuenta_dispositivo}</p>
+        <p><b>Tipo solicitud:</b> {incidencia.tipo_solicitud_dispositivo}</p>
+        <p><b>IMEI personal:</b> {incidencia.imei_personal}</p>
+        <p><b>Modelo:</b> {incidencia.modelo_personal}</p>
+        <p><b>Motivo intervención:</b> {incidencia.motivo_intervencion}</p>
+        <p><b>Intervención solicitada:</b> {incidencia.intervencion_solicitada}</p>
+      </>;
+      case '8': return <>
+        <p><b>Centro Anide:</b> {incidencia.centro_anide}</p>
+        <p><b>Puesto trabajo:</b> {incidencia.puesto_trabajo}</p>
+        <p><b>Eliminar Nombre:</b> {incidencia.eliminar_nombre}</p>
+        <p><b>Eliminar Fecha:</b> {incidencia.eliminar_fecha}</p>
+        <p><b>Eliminar Urgente:</b> {incidencia.eliminar_urgente ? 'Sí' : 'No'}</p>
+        <p><b>Otorgar Nombre:</b> {incidencia.otorgar_nombre}</p>
+        <p><b>Otorgar Fecha:</b> {incidencia.otorgar_fecha}</p>
+        <p><b>Otorgar Urgente:</b> {incidencia.otorgar_urgente ? 'Sí' : 'No'}</p>
+      </>;
       default: return null;
     }
   };
@@ -110,14 +91,13 @@ function GestionarIncidencia({ incidencia, onActualizada }) {
     <div className="card my-3 shadow">
       <div className="card-body">
         <h5 className="card-title">{incidencia.descripcion}</h5>
-
         <p><b>Centro:</b> {incidencia.centro}</p>
         <p><b>Fecha:</b> {incidencia.fecha}</p>
         <p><b>Urgencia:</b> {incidencia.urgencia ? 'Sí' : 'No'}</p>
         <p><b>Prioridad:</b> {incidencia.prioridad}</p>
-        <p><b>Teléfono contacto:</b> {incidencia.telefono_contacto}</p>
+        <p><b>Teléfono:</b> {incidencia.telefono_contacto}</p>
 
-        {renderCamposPorTipo()}
+        {renderCamposTipo()}
 
         <div className="mb-2">
           <label>Estado:</label>
