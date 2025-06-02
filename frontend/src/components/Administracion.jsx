@@ -5,22 +5,25 @@ import API_BASE from '../utils/config';
 
 function Administracion() {
   const [usuarios, setUsuarios] = useState([]);
+  const [incidencias, setIncidencias] = useState([]);
   const [nuevo, setNuevo] = useState({ username: '', email: '', password: '' });
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
-  const [incidencias, setIncidencias] = useState([]);
   const [nuevas, setNuevas] = useState(0);
 
-  // Paginación usuarios
+  // Paginación
   const [paginaUsuarios, setPaginaUsuarios] = useState(1);
   const usuariosPorPagina = 5;
-
-  // Paginación incidencias
   const [paginaIncidencias, setPaginaIncidencias] = useState(1);
   const incidenciasPorPagina = 5;
 
-  // Modal cambio de contraseña
   const [modal, setModal] = useState({ abierto: false, id: null, username: '', newPassword: '' });
+  const [incidenciaSeleccionada, setIncidenciaSeleccionada] = useState(null);
+
+  useEffect(() => {
+    cargarUsuarios();
+    cargarIncidencias();
+  }, []);
 
   const cargarUsuarios = async () => {
     try {
@@ -31,7 +34,7 @@ function Administracion() {
       const data = await res.json();
       setUsuarios(data.results);
     } catch {
-      setError('Error al cargar usuarios');
+      setError("Error al cargar usuarios");
     }
   };
 
@@ -45,22 +48,12 @@ function Administracion() {
       setIncidencias(data.results);
       const nuevasIncidencias = (data.results || []).filter(i => i.estado === 'nueva').length;
       setNuevas(nuevasIncidencias);
-    } catch (err) {
-      console.error(err);
-      setError("Error de conexión");
+    } catch {
+      setError("Error al cargar incidencias");
     }
   };
 
-  useEffect(() => {
-    cargarUsuarios();
-    cargarIncidencias();
-  }, []);
-
-  const handleInputChange = (e) => {
-    setNuevo({ ...nuevo, [e.target.name]: e.target.value });
-  };
-
-  const handleCrear = async (e) => {
+  const handleCrearUsuario = async (e) => {
     e.preventDefault();
     setMensaje('');
     setError('');
@@ -69,10 +62,7 @@ function Administracion() {
       const token = await refreshTokenIfNeeded();
       const res = await fetch(`${API_BASE}/crear_usuario/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(nuevo)
       });
 
@@ -85,32 +75,21 @@ function Administracion() {
         setError(data.error || 'Error al crear usuario');
       }
     } catch {
-      setError('Error de conexión con el servidor');
+      setError('Error de conexión');
     }
   };
 
-  const handleAbrirModal = (id, username) => {
-    setModal({ abierto: true, id, username, newPassword: '' });
-  };
-
-  const handleGuardarPassword = async () => {
+  const handleCambioPassword = async () => {
     if (!modal.newPassword) {
-      setError("Debes introducir la nueva contraseña");
+      setError("Introduce nueva contraseña");
       return;
     }
-
     try {
       const token = await refreshTokenIfNeeded();
       const res = await fetch(`${API_BASE}/cambiar_password/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          user_id: modal.id,
-          new_password: modal.newPassword
-        })
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ user_id: modal.id, new_password: modal.newPassword })
       });
 
       if (res.ok) {
@@ -124,7 +103,6 @@ function Administracion() {
     }
   };
 
-
   const usuariosPaginados = usuarios.slice((paginaUsuarios - 1) * usuariosPorPagina, paginaUsuarios * usuariosPorPagina);
   const incidenciasPaginadas = incidencias.slice((paginaIncidencias - 1) * incidenciasPorPagina, paginaIncidencias * incidenciasPorPagina);
 
@@ -136,46 +114,43 @@ function Administracion() {
         Tienes <strong>{nuevas}</strong> incidencias nuevas.
       </div>
 
-      <div className="card mt-3">
-        <div className="card-body">
-          <h5>Crear nuevo usuario</h5>
-          {mensaje && <div className="alert alert-success">{mensaje}</div>}
-          {error && <div className="alert alert-danger">{error}</div>}
-
-          <form onSubmit={handleCrear}>
-            <div className="row">
-              <div className="col-md-4 mb-2">
-                <input type="text" className="form-control" name="username" value={nuevo.username} onChange={handleInputChange} placeholder="Usuario" required />
-              </div>
-              <div className="col-md-4 mb-2">
-                <input type="email" className="form-control" name="email" value={nuevo.email} onChange={handleInputChange} placeholder="Correo" required />
-              </div>
-              <div className="col-md-4 mb-2">
-                <input type="password" className="form-control" name="password" value={nuevo.password} onChange={handleInputChange} placeholder="Contraseña" required />
-              </div>
+      {/* CREAR USUARIO */}
+      <div className="card mt-3 p-3">
+        <h5>Crear nuevo usuario</h5>
+        {mensaje && <div className="alert alert-success">{mensaje}</div>}
+        {error && <div className="alert alert-danger">{error}</div>}
+        <form onSubmit={handleCrearUsuario}>
+          <div className="row">
+            <div className="col-md-4 mb-2">
+              <input className="form-control" name="username" placeholder="Usuario"
+                value={nuevo.username} onChange={(e) => setNuevo({...nuevo, username: e.target.value})} required />
             </div>
-            <button type="submit" className="btn btn-success mt-2">Crear</button>
-          </form>
-        </div>
+            <div className="col-md-4 mb-2">
+              <input className="form-control" name="email" placeholder="Correo"
+                value={nuevo.email} onChange={(e) => setNuevo({...nuevo, email: e.target.value})} required />
+            </div>
+            <div className="col-md-4 mb-2">
+              <input className="form-control" name="password" type="password" placeholder="Contraseña"
+                value={nuevo.password} onChange={(e) => setNuevo({...nuevo, password: e.target.value})} required />
+            </div>
+          </div>
+          <button className="btn btn-success mt-2" type="submit">Crear usuario</button>
+        </form>
       </div>
 
+      {/* USUARIOS */}
       <div className="mt-5">
         <h4>Usuarios registrados</h4>
         <table className="table table-bordered table-striped mt-3">
-          <thead className="table-light">
-            <tr>
-              <th>Usuario</th><th>Correo</th><th>Admin</th><th>Acciones</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Usuario</th><th>Correo</th><th>Admin</th><th>Acciones</th></tr></thead>
           <tbody>
             {usuariosPaginados.map(u => (
               <tr key={u.id}>
-                <td>{u.username}</td>
-                <td>{u.email}</td>
+                <td>{u.username}</td><td>{u.email}</td>
                 <td>{u.is_superuser ? '✔️' : '❌'}</td>
-                <td>
-                  <button className="btn btn-sm btn-outline-primary" onClick={() => handleAbrirModal(u.id, u.username)}>Cambiar contraseña</button>
-                </td>
+                <td><button className="btn btn-outline-primary btn-sm"
+                  onClick={() => setModal({ abierto: true, id: u.id, username: u.username, newPassword: '' })}>
+                  Cambiar contraseña</button></td>
               </tr>
             ))}
           </tbody>
@@ -183,37 +158,52 @@ function Administracion() {
 
         <div className="text-center">
           {Array.from({ length: Math.ceil(usuarios.length / usuariosPorPagina) }, (_, i) => (
-            <button key={i} className={`btn ${paginaUsuarios === i + 1 ? 'btn-primary' : 'btn-outline-primary'} mx-1`} onClick={() => setPaginaUsuarios(i + 1)}>
-              {i + 1}
-            </button>
+            <button key={i} className={`btn ${paginaUsuarios === i+1 ? 'btn-primary' : 'btn-outline-primary'} mx-1`}
+              onClick={() => setPaginaUsuarios(i+1)}>{i+1}</button>
           ))}
         </div>
       </div>
 
+      {/* INCIDENCIAS */}
       <div className="mt-5">
         <h4>Gestión de Incidencias</h4>
-        {incidenciasPaginadas.map((inc) => (
-          <GestionarIncidencia key={inc.id} incidencia={inc} onActualizada={cargarIncidencias} />
-        ))}
-
-        <div className="text-center mt-3">
-          {Array.from({ length: Math.ceil(incidencias.length / incidenciasPorPagina) }, (_, i) => (
-            <button key={i} className={`btn ${paginaIncidencias === i + 1 ? 'btn-primary' : 'btn-outline-primary'} mx-1`} onClick={() => setPaginaIncidencias(i + 1)}>
-              {i + 1}
-            </button>
-          ))}
-        </div>
+        {incidenciaSeleccionada ? (
+          <>
+            <button className="btn btn-secondary mb-3" onClick={() => setIncidenciaSeleccionada(null)}>⬅ Volver</button>
+            <GestionarIncidencia incidencia={incidenciaSeleccionada} onActualizada={cargarIncidencias} />
+          </>
+        ) : (
+          <>
+            {incidenciasPaginadas.map(inc => (
+              <div key={inc.id} className="card my-2 shadow-sm" style={{ cursor: 'pointer' }}
+                onClick={() => setIncidenciaSeleccionada(inc)}>
+                <div className="card-body">
+                  <h5>{inc.descripcion}</h5>
+                  <p><strong>Centro:</strong> {inc.centro} — <strong>Estado:</strong> {inc.estado}</p>
+                </div>
+              </div>
+            ))}
+            <div className="text-center mt-3">
+              {Array.from({ length: Math.ceil(incidencias.length / incidenciasPorPagina) }, (_, i) => (
+                <button key={i} className={`btn ${paginaIncidencias === i+1 ? 'btn-primary' : 'btn-outline-primary'} mx-1`}
+                  onClick={() => setPaginaIncidencias(i+1)}>{i+1}</button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
+      {/* MODAL CAMBIO CONTRASEÑA */}
       {modal.abierto && (
         <div className="modal d-block bg-dark bg-opacity-50">
           <div className="modal-dialog">
             <div className="modal-content p-3">
               <h5>Cambiar contraseña de {modal.username}</h5>
-              <input type="password" className="form-control mt-3" placeholder="Nueva contraseña" value={modal.newPassword} onChange={(e) => setModal({...modal, newPassword: e.target.value})} />
+              <input type="password" className="form-control mt-3" placeholder="Nueva contraseña"
+                value={modal.newPassword} onChange={(e) => setModal({...modal, newPassword: e.target.value})} />
               <div className="mt-3 text-end">
                 <button className="btn btn-secondary me-2" onClick={() => setModal({ abierto: false })}>Cancelar</button>
-                <button className="btn btn-success" onClick={handleGuardarPassword}>Guardar</button>
+                <button className="btn btn-success" onClick={handleCambioPassword}>Guardar</button>
               </div>
             </div>
           </div>

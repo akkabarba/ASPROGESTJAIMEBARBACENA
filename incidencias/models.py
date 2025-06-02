@@ -32,9 +32,9 @@ class Dispositivo(models.Model):
 class Incidencia(models.Model):
     CENTROS = [
         ('CENTRAL', 'CENTRAL'), ('CPM I', 'CPM I'), ('CPM II', 'CPM II'), ('RGA III', 'RGA III'),
-        ('CPM IV', 'CPM IV'), ('DISL V', 'DISL V'), ('CPM VII', 'CPM VII'), ('CPM X', 'CPM X'),
+        ('CPM IV', 'CPM IV'), ('OISL V', 'OISL V'), ('CPM VII', 'CPM VII'), ('CPM X', 'CPM X'),
         ('ISL XI', 'ISL XI'), ('ISL XII', 'ISL XII'), ('ISL XIII', 'ISL XIII'),
-        ('CAL XIV', 'CAL XIV'), ('CPM XV', 'CPM XV'),
+        ('CAI XIV', 'CAI XIV'), ('CPM XV', 'CPM XV'),
     ]
     RELATIVA_A = [
         ('1', 'Línea y/o dispositivo telefónico corporativo'),

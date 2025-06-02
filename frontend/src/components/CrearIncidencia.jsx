@@ -4,13 +4,35 @@ import API_BASE from '../utils/config';
 
 function CrearIncidencia() {
   const [form, setForm] = useState({
-    centro: '',
-    fecha: '',
-    urgencia: false,
-    prioridad: 'Media',
-    relativa: '',
-    descripcion: '',
-    telefono_contacto: ''
+    centro: '', fecha: '', urgencia: false, prioridad: 'Media', relativa: '',
+    descripcion: '', telefono_contacto: '',
+
+    // Tipo 1
+    imei: '', tipo_incidencia_telefono: '',
+
+    // Tipo 2
+    numero_serie: '', sesion: '', tipo_incidencia_ordenador: '',
+
+    // Tipo 3
+    tipo_incidencia_internet: '', fecha_inicio_incidencia: '',
+
+    // Tipo 4
+    cuenta_gsuite: '', tipo_incidencia_gsuite: '',
+
+    // Tipo 5
+    tipo_incidencia_impresora: '',
+
+    // Tipo 6
+    trabajador_plataforma: '', tipo_incidencia_plataforma: '',
+
+    // Tipo 7
+    trabajador_dispositivo: '', contacto_dispositivo: '', cuenta_dispositivo: '',
+    tipo_solicitud_dispositivo: '', imei_personal: '', modelo_personal: '',
+    motivo_intervencion: '', intervencion_solicitada: '',
+
+    // Tipo 8
+    centro_anide: '', puesto_trabajo: '', eliminar_nombre: '', eliminar_fecha: '',
+    eliminar_urgente: false, otorgar_nombre: '', otorgar_fecha: '', otorgar_urgente: false
   });
 
   const [mensaje, setMensaje] = useState('');
@@ -18,10 +40,7 @@ function CrearIncidencia() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSubmit = async (e) => {
@@ -29,124 +48,167 @@ function CrearIncidencia() {
     setMensaje('');
     setError('');
 
-    const token = await refreshTokenIfNeeded();
-
     try {
+      const token = await refreshTokenIfNeeded();
       const res = await fetch(`${API_BASE}/incidencias/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(form)
       });
 
       if (res.ok) {
         setMensaje('Incidencia creada correctamente.');
-        setForm({
-          centro: '',
-          fecha: '',
-          urgencia: false,
-          prioridad: 'Media',
-          relativa: '',
-          descripcion: '',
-          telefono_contacto: ''
-        });
+        resetForm();
       } else {
         const data = await res.json();
         setError(data.detail || 'Error al crear la incidencia');
       }
-    } catch (err) {
+    } catch {
       setError('Error de conexión con el servidor');
+    }
+  };
+
+  const resetForm = () => {
+    setForm({
+      centro: '', fecha: '', urgencia: false, prioridad: 'Media', relativa: '',
+      descripcion: '', telefono_contacto: '', imei: '', tipo_incidencia_telefono: '',
+      numero_serie: '', sesion: '', tipo_incidencia_ordenador: '', tipo_incidencia_internet: '', fecha_inicio_incidencia: '',
+      cuenta_gsuite: '', tipo_incidencia_gsuite: '', tipo_incidencia_impresora: '', trabajador_plataforma: '',
+      tipo_incidencia_plataforma: '', trabajador_dispositivo: '', contacto_dispositivo: '', cuenta_dispositivo: '',
+      tipo_solicitud_dispositivo: '', imei_personal: '', modelo_personal: '', motivo_intervencion: '',
+      intervencion_solicitada: '', centro_anide: '', puesto_trabajo: '', eliminar_nombre: '', eliminar_fecha: '',
+      eliminar_urgente: false, otorgar_nombre: '', otorgar_fecha: '', otorgar_urgente: false
+    });
+  };
+
+  const renderCamposTipo = () => {
+    switch (form.relativa) {
+      case '1': return (
+        <>
+          <label>IMEI</label><input name="imei" value={form.imei} onChange={handleChange} className="form-control mb-2" />
+          <label>Tipo incidencia teléfono</label><input name="tipo_incidencia_telefono" value={form.tipo_incidencia_telefono} onChange={handleChange} className="form-control mb-2" />
+        </>
+      );
+      case '2': return (
+        <>
+          <label>Número de serie</label><input name="numero_serie" value={form.numero_serie} onChange={handleChange} className="form-control mb-2" />
+          <label>Sesión</label><input name="sesion" value={form.sesion} onChange={handleChange} className="form-control mb-2" />
+          <label>Tipo incidencia ordenador</label><input name="tipo_incidencia_ordenador" value={form.tipo_incidencia_ordenador} onChange={handleChange} className="form-control mb-2" />
+        </>
+      );
+      case '3': return (
+        <>
+          <label>Tipo incidencia Internet</label><input name="tipo_incidencia_internet" value={form.tipo_incidencia_internet} onChange={handleChange} className="form-control mb-2" />
+          <label>Fecha inicio incidencia</label><input type="datetime-local" name="fecha_inicio_incidencia" value={form.fecha_inicio_incidencia} onChange={handleChange} className="form-control mb-2" />
+        </>
+      );
+      case '4': return (
+        <>
+          <label>Cuenta GSuite</label><input name="cuenta_gsuite" value={form.cuenta_gsuite} onChange={handleChange} className="form-control mb-2" />
+          <label>Tipo incidencia GSuite</label><input name="tipo_incidencia_gsuite" value={form.tipo_incidencia_gsuite} onChange={handleChange} className="form-control mb-2" />
+        </>
+      );
+      case '5': return (
+        <>
+          <label>Tipo incidencia Impresora</label><input name="tipo_incidencia_impresora" value={form.tipo_incidencia_impresora} onChange={handleChange} className="form-control mb-2" />
+        </>
+      );
+      case '6': return (
+        <>
+          <label>Trabajador plataforma</label><input name="trabajador_plataforma" value={form.trabajador_plataforma} onChange={handleChange} className="form-control mb-2" />
+          <label>Tipo incidencia plataforma</label><input name="tipo_incidencia_plataforma" value={form.tipo_incidencia_plataforma} onChange={handleChange} className="form-control mb-2" />
+        </>
+      );
+      case '7': return (
+        <>
+          <label>Trabajador</label><input name="trabajador_dispositivo" value={form.trabajador_dispositivo} onChange={handleChange} className="form-control mb-2" />
+          <label>Contacto</label><input name="contacto_dispositivo" value={form.contacto_dispositivo} onChange={handleChange} className="form-control mb-2" />
+          <label>Cuenta</label><input name="cuenta_dispositivo" value={form.cuenta_dispositivo} onChange={handleChange} className="form-control mb-2" />
+          <label>Tipo solicitud</label><input name="tipo_solicitud_dispositivo" value={form.tipo_solicitud_dispositivo} onChange={handleChange} className="form-control mb-2" />
+          <label>IMEI</label><input name="imei_personal" value={form.imei_personal} onChange={handleChange} className="form-control mb-2" />
+          <label>Modelo</label><input name="modelo_personal" value={form.modelo_personal} onChange={handleChange} className="form-control mb-2" />
+          <label>Motivo</label><input name="motivo_intervencion" value={form.motivo_intervencion} onChange={handleChange} className="form-control mb-2" />
+          <label>Intervención</label><input name="intervencion_solicitada" value={form.intervencion_solicitada} onChange={handleChange} className="form-control mb-2" />
+        </>
+      );
+      case '8': return (
+        <>
+          <label>Centro ANIDE</label><input name="centro_anide" value={form.centro_anide} onChange={handleChange} className="form-control mb-2" />
+          <label>Puesto trabajo</label><input name="puesto_trabajo" value={form.puesto_trabajo} onChange={handleChange} className="form-control mb-2" />
+          <label>Eliminar nombre</label><input name="eliminar_nombre" value={form.eliminar_nombre} onChange={handleChange} className="form-control mb-2" />
+          <label>Eliminar fecha</label><input type="datetime-local" name="eliminar_fecha" value={form.eliminar_fecha} onChange={handleChange} className="form-control mb-2" />
+          <label><input type="checkbox" name="eliminar_urgente" checked={form.eliminar_urgente} onChange={handleChange} /> Eliminar urgente</label>
+          <label>Otorgar nombre</label><input name="otorgar_nombre" value={form.otorgar_nombre} onChange={handleChange} className="form-control mb-2" />
+          <label>Otorgar fecha</label><input type="datetime-local" name="otorgar_fecha" value={form.otorgar_fecha} onChange={handleChange} className="form-control mb-2" />
+          <label><input type="checkbox" name="otorgar_urgente" checked={form.otorgar_urgente} onChange={handleChange} /> Otorgar urgente</label>
+        </>
+      );
+      default: return null;
     }
   };
 
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Crear Incidencia</h2>
-
+      <h2>Crear Incidencia</h2>
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-danger">{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        {/* centro */}
-        <div className="mb-3">
-          <label className="form-label">Centro *</label>
-          <select className="form-select" name="centro" value={form.centro} onChange={handleChange} required>
-            <option value="">Seleccione...</option>
-            <option>CENTRAL</option>
-            <option>CPM I</option>
-            <option>CPM II</option>
-            <option>RGA III</option>
-            <option>CPM IV</option>
-            <option>OISL V</option>
-            <option>CPM VII</option>
-            <option>CPM X</option>
-            <option>ISL XI</option>
-            <option>ISL XII</option>
-            <option>ISL XIII</option>
-            <option>CAI XIV</option>
-            <option>CPM XV</option>
-          </select>
+        <label>Centro</label>
+        <select name="centro" value={form.centro} onChange={handleChange} className="form-select mb-2">
+          <option value="">Selecciona centro...</option>
+          <option value="CENTRAL">CENTRAL</option>
+          <option value="CPM I">CPM I</option>
+          <option value="CPM II">CPM II</option>
+          <option value="RGA III">RGA III</option>
+          <option value="CPM IV">CPM IV</option>
+          <option value="OISL V">OISL V</option>
+          <option value="CPM VII">CPM VII</option>
+          <option value="CPM X">CPM X</option>
+          <option value="ISL XI">ISL XI</option>
+          <option value="ISL XII">ISL XII</option>
+          <option value="ISL XIII">ISL XIII</option>
+          <option value="CAI XIV">CAI XIV</option>
+          <option value="CPM XV">CPM XV</option>
+        </select>
+
+        <label>Fecha</label>
+        <input type="date" name="fecha" value={form.fecha} onChange={handleChange} className="form-control mb-2" />
+        
+        <div className="form-check mb-2">
+          <input type="checkbox" name="urgencia" checked={form.urgencia} onChange={handleChange} className="form-check-input" />
+          <label className="form-check-label">¿Urgente?</label>
         </div>
 
-        {/* fecha */}
-        <div className="mb-3">
-          <label className="form-label">Fecha *</label>
-          <input type="date" className="form-control" name="fecha" value={form.fecha} onChange={handleChange} required />
-        </div>
+        <label>Prioridad</label>
+        <select name="prioridad" value={form.prioridad} onChange={handleChange} className="form-select mb-2">
+          <option value="Baja">Baja</option>
+          <option value="Media">Media</option>
+          <option value="Alta">Alta</option>
+        </select>
 
-        {/* urgencia */}
-        <div className="mb-3">
-          <label className="form-label">¿Urgente?</label>
-          <div className="form-check">
-            <input type="checkbox" className="form-check-input" name="urgencia" checked={form.urgencia} onChange={handleChange} />
-            <label className="form-check-label">Sí</label>
-          </div>
-        </div>
+        <label>Tipo incidencia (relativa a)</label>
+        <select name="relativa" value={form.relativa} onChange={handleChange} className="form-select mb-2">
+          <option value="">Seleccione...</option>
+          <option value="1">Teléfono corporativo</option>
+          <option value="2">Ordenador</option>
+          <option value="3">Internet</option>
+          <option value="4">Cuenta GSuite</option>
+          <option value="5">Impresora</option>
+          <option value="6">Plataforma gestión</option>
+          <option value="7">Dispositivo personal</option>
+          <option value="8">Control accesos</option>
+        </select>
 
-        {/* prioridad */}
-        <div className="mb-3">
-          <label className="form-label">Prioridad *</label>
-          <select className="form-select" name="prioridad" value={form.prioridad} onChange={handleChange} required>
-            <option value="Baja">Baja</option>
-            <option value="Media">Media</option>
-            <option value="Alta">Alta</option>
-          </select>
-        </div>
+        <label>Descripción</label>
+        <textarea name="descripcion" value={form.descripcion} onChange={handleChange} className="form-control mb-2" />
 
-        {/* relativa */}
-        <div className="mb-3">
-          <label className="form-label">Relativa a *</label>
-          <select className="form-select" name="relativa" value={form.relativa} onChange={handleChange} required>
-            <option value="">Seleccione...</option>
-            <option value="1">Línea y/o dispositivo telefónico corporativo</option>
-            <option value="2">Ordenador</option>
-            <option value="3">Internet</option>
-            <option value="4">Cuenta Corporativa GSuite</option>
-            <option value="5">Impresora</option>
-            <option value="6">Plataforma gestion.grupoanide.es</option>
-            <option value="7">Dispositivos personales autorizados</option>
-            <option value="8">Control de accesos</option>
-            <option value="9">Otro</option>
-          </select>
-        </div>
+        <label>Teléfono contacto</label>
+        <input name="telefono_contacto" value={form.telefono_contacto} onChange={handleChange} className="form-control mb-2" />
 
-        {/* descripción */}
-        <div className="mb-3">
-          <label className="form-label">Descripción *</label>
-          <textarea className="form-control" name="descripcion" value={form.descripcion} onChange={handleChange} rows="4" required />
-        </div>
+        {renderCamposTipo()}
 
-        {/* teléfono */}
-        <div className="mb-3">
-          <label className="form-label">Teléfono de contacto *</label>
-          <input type="text" className="form-control" name="telefono_contacto" value={form.telefono_contacto} onChange={handleChange} required />
-        </div>
-
-        <div className="text-center">
-          <button type="submit" className="btn btn-success px-5">Enviar</button>
-        </div>
+        <button type="submit" className="btn btn-success">Enviar</button>
       </form>
     </div>
   );
