@@ -166,10 +166,9 @@
                     <tr key={u.id}>
                       <td>{u.username}</td><td>{u.email}</td>
                       <td>{u.is_superuser ? '✔️' : '❌'}</td>
-                      <td><button className="btn btn-outline-primary btn-sm"
+                      <td><button className="btn btn-outline-primary btn-sm me-2"
                         onClick={() => setModal({ abierto: true, id: u.id, username: u.username, newPassword: '' })}>
                         Cambiar contraseña</button>
-                          | 
                         <button className="btn btn-outline-danger btn-sm"
                         onClick={() => setModalEliminar({ abierto: true, id: u.id, email: u.email, confirmEmail: '' })}>
                         Eliminar
