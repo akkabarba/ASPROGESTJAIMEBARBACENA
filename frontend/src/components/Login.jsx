@@ -5,7 +5,7 @@ function Login({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);  // <-- Añadimos el estado de carga
+  const [loading, setLoading] = useState(false);
 
   const guardarCookie = (clave, valor) => {
     document.cookie = `${clave}=${valor}; path=/; SameSite=Lax;`;
@@ -14,7 +14,7 @@ function Login({ onLoginSuccess }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);  // <-- Al comenzar el login, activamos el loading
+    setLoading(true);  
 
     try {
       const response = await fetch(`${API_BASE}/token/`, {
@@ -40,7 +40,7 @@ function Login({ onLoginSuccess }) {
     } catch (err) {
       setError(err.message || 'Error de conexión');
     } finally {
-      setLoading(false);  // <-- Al terminar (exito o fallo), apagamos loading
+      setLoading(false); 
     }
   };
 
@@ -57,7 +57,7 @@ function Login({ onLoginSuccess }) {
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
-            disabled={loading}  // <-- Deshabilitamos inputs mientras carga
+            disabled={loading}  
           />
         </div>
         <div className="mb-3">

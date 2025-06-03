@@ -4,7 +4,7 @@ function Navbar({ usuario, setVista, onLogout }) {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary px-4 rounded shadow">
       <div className="container-fluid">
-        <span className="navbar-brand fw-bold">ASPROGEST</span>
+        <span className="navbar-brand fw-bold" style={{cursor: 'pointer' }} onClick={() => setVista('home')}>ASPROGEST</span>
 
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">

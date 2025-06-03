@@ -40,7 +40,7 @@ function App() {
 
   const handleLoginSuccess = (userInfo) => {
     setUsuario(userInfo);
-    setVista('crear');
+    setVista('home');
   };
 
   return (
