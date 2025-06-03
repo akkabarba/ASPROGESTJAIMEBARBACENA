@@ -169,6 +169,7 @@
                       <td><button className="btn btn-outline-primary btn-sm"
                         onClick={() => setModal({ abierto: true, id: u.id, username: u.username, newPassword: '' })}>
                         Cambiar contraseña</button>
+                          | 
                         <button className="btn btn-outline-danger btn-sm"
                         onClick={() => setModalEliminar({ abierto: true, id: u.id, email: u.email, confirmEmail: '' })}>
                         Eliminar
