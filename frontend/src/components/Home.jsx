@@ -11,11 +11,12 @@ function Home({ usuario, setVista }) {
 
       try {
         const token = await refreshTokenIfNeeded();
-        const res = await fetch(`${API_BASE}/incidencias/nuevas/`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        const res = await fetch(`${API_BASE}/incidencias_nuevas/`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
+
+        if (!res.ok) throw new Error();
+
         const data = await res.json();
         setNuevas(data.nuevas);
       } catch {

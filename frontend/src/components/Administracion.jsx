@@ -12,27 +12,23 @@ function Administracion() {
   const [nuevas, setNuevas] = useState(0);
 
   const [paginaUsuarios, setPaginaUsuarios] = useState(1);
-  const usuariosPorPagina = 5;
+  const [totalPaginasUsuarios, setTotalPaginasUsuarios] = useState(1);
 
   const [paginaIncidencias, setPaginaIncidencias] = useState(1);
-  const incidenciasPorPagina = 5;
+  const [totalPaginasIncidencias, setTotalPaginasIncidencias] = useState(1);
 
   const [modal, setModal] = useState({ abierto: false, id: null, username: '', newPassword: '' });
   const [incidenciaSeleccionada, setIncidenciaSeleccionada] = useState(null);
 
-  useEffect(() => {
-    cargarUsuarios();
-    cargarIncidencias();
-  }, []);
-
   const cargarUsuarios = async () => {
     try {
       const token = await refreshTokenIfNeeded();
-      const res = await fetch(`${API_BASE}/usuarios/`, {
+      const res = await fetch(`${API_BASE}/usuarios/?page=${paginaUsuarios}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       setUsuarios(data.results);
+      setTotalPaginasUsuarios(Math.ceil(data.count / 5));
     } catch {
       setError("Error al cargar usuarios");
     }
@@ -41,11 +37,12 @@ function Administracion() {
   const cargarIncidencias = async () => {
     try {
       const token = await refreshTokenIfNeeded();
-      const res = await fetch(`${API_BASE}/incidencias/`, {
+      const res = await fetch(`${API_BASE}/incidencias/?page=${paginaIncidencias}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       setIncidencias(data.results);
+      setTotalPaginasIncidencias(Math.ceil(data.count / 5));
       const nuevasIncidencias = (data.results || []).filter(i => i.estado === 'nueva').length;
       setNuevas(nuevasIncidencias);
     } catch {
@@ -53,11 +50,13 @@ function Administracion() {
     }
   };
 
+  useEffect(() => { cargarUsuarios(); }, [paginaUsuarios]);
+  useEffect(() => { cargarIncidencias(); }, [paginaIncidencias]);
+
   const handleCrearUsuario = async (e) => {
     e.preventDefault();
     setMensaje('');
     setError('');
-
     try {
       const token = await refreshTokenIfNeeded();
       const res = await fetch(`${API_BASE}/crear_usuario/`, {
@@ -103,19 +102,6 @@ function Administracion() {
     }
   };
 
-  // Paginación calculada
-  const totalPaginasUsuarios = Math.ceil(usuarios.length / usuariosPorPagina);
-  const totalPaginasIncidencias = Math.ceil(incidencias.length / incidenciasPorPagina);
-
-  const usuariosPaginados = usuarios.slice(
-    (paginaUsuarios - 1) * usuariosPorPagina,
-    paginaUsuarios * usuariosPorPagina
-  );
-  const incidenciasPaginadas = incidencias.slice(
-    (paginaIncidencias - 1) * incidenciasPorPagina,
-    paginaIncidencias * incidenciasPorPagina
-  );
-
   return (
     <div className="container mt-4">
       <h2>Panel de Administración</h2>
@@ -154,7 +140,7 @@ function Administracion() {
         <table className="table table-bordered table-striped mt-3">
           <thead><tr><th>Usuario</th><th>Correo</th><th>Admin</th><th>Acciones</th></tr></thead>
           <tbody>
-            {usuariosPaginados.map(u => (
+            {usuarios.map(u => (
               <tr key={u.id}>
                 <td>{u.username}</td><td>{u.email}</td>
                 <td>{u.is_superuser ? '✔️' : '❌'}</td>
@@ -167,28 +153,15 @@ function Administracion() {
         </table>
 
         <div className="text-center my-3">
-          <button 
-            className="btn btn-outline-secondary mx-1"
-            disabled={paginaUsuarios <= 1}
-            onClick={() => setPaginaUsuarios(paginaUsuarios - 1)}
-          >◀ Anterior</button>
-
-          <span className="mx-2">
-            Página {paginaUsuarios} de {totalPaginasUsuarios}
-          </span>
-
-          <button 
-            className="btn btn-outline-secondary mx-1"
-            disabled={paginaUsuarios >= totalPaginasUsuarios}
-            onClick={() => setPaginaUsuarios(paginaUsuarios + 1)}
-          >Siguiente ▶</button>
+          <button className="btn btn-outline-secondary mx-1" disabled={paginaUsuarios <= 1} onClick={() => setPaginaUsuarios(paginaUsuarios - 1)}>◀</button>
+          Página {paginaUsuarios} de {totalPaginasUsuarios}
+          <button className="btn btn-outline-secondary mx-1" disabled={paginaUsuarios >= totalPaginasUsuarios} onClick={() => setPaginaUsuarios(paginaUsuarios + 1)}>▶</button>
         </div>
       </div>
 
       {/* INCIDENCIAS */}
       <div className="mt-5">
         <h4>Gestión de Incidencias</h4>
-
         {incidenciaSeleccionada ? (
           <>
             <button className="btn btn-secondary mb-3" onClick={() => setIncidenciaSeleccionada(null)}>⬅ Volver</button>
@@ -196,7 +169,7 @@ function Administracion() {
           </>
         ) : (
           <>
-            {incidenciasPaginadas.map(inc => (
+            {incidencias.map(inc => (
               <div key={inc.id} className="card my-2 shadow-sm" style={{ cursor: 'pointer' }}
                 onClick={() => setIncidenciaSeleccionada(inc)}>
                 <div className="card-body">
@@ -205,29 +178,15 @@ function Administracion() {
                 </div>
               </div>
             ))}
-
             <div className="text-center my-3">
-              <button 
-                className="btn btn-outline-secondary mx-1"
-                disabled={paginaIncidencias <= 1}
-                onClick={() => setPaginaIncidencias(paginaIncidencias - 1)}
-              >◀ Anterior</button>
-
-              <span className="mx-2">
-                Página {paginaIncidencias} de {totalPaginasIncidencias}
-              </span>
-
-              <button 
-                className="btn btn-outline-secondary mx-1"
-                disabled={paginaIncidencias >= totalPaginasIncidencias}
-                onClick={() => setPaginaIncidencias(paginaIncidencias + 1)}
-              >Siguiente ▶</button>
+              <button className="btn btn-outline-secondary mx-1" disabled={paginaIncidencias <= 1} onClick={() => setPaginaIncidencias(paginaIncidencias - 1)}>◀</button>
+              Página {paginaIncidencias} de {totalPaginasIncidencias}
+              <button className="btn btn-outline-secondary mx-1" disabled={paginaIncidencias >= totalPaginasIncidencias} onClick={() => setPaginaIncidencias(paginaIncidencias + 1)}>▶</button>
             </div>
           </>
         )}
       </div>
 
-      {/* MODAL CAMBIO CONTRASEÑA */}
       {modal.abierto && (
         <div className="modal d-block bg-dark bg-opacity-50">
           <div className="modal-dialog">
@@ -243,7 +202,6 @@ function Administracion() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

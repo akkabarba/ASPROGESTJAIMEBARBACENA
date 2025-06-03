@@ -125,8 +125,8 @@ class IncidenciaViewSet(ModelViewSet):
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def contar_incidencias_nuevas(request):
-    total_nuevas = Incidencia.objects.filter(estado='nueva').count()
-    return Response({'nuevas': total_nuevas})
+    nuevas = Incidencia.objects.filter(estado='nueva').count()
+    return Response({'nuevas': nuevas})
 
 token_obtain_pair = CustomTokenObtainPairView.as_view()
 token_refresh = TokenRefreshView.as_view()
