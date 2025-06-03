@@ -3,7 +3,7 @@ import { refreshTokenIfNeeded } from '../utils/auth';
 import API_BASE from '../utils/config';
 
 function Home({ usuario, setVista }) {
-  const [nuevas, setNuevas] = useState(null);
+  const [nuevas, setNuevas] = useState(0);
 
   useEffect(() => {
     const fetchNuevas = async () => {
