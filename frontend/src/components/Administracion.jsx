@@ -169,6 +169,7 @@ function Administracion() {
         <div className="text-center my-3">
           <button 
             className="btn btn-outline-secondary mx-1"
+            disabled={paginaUsuarios <= 1}
             onClick={() => setPaginaUsuarios(paginaUsuarios - 1)}
           >◀ Anterior</button>
 
@@ -178,6 +179,7 @@ function Administracion() {
 
           <button 
             className="btn btn-outline-secondary mx-1"
+            disabled={paginaUsuarios >= totalPaginasUsuarios}
             onClick={() => setPaginaUsuarios(paginaUsuarios + 1)}
           >Siguiente ▶</button>
         </div>
@@ -207,6 +209,7 @@ function Administracion() {
             <div className="text-center my-3">
               <button 
                 className="btn btn-outline-secondary mx-1"
+                disabled={paginaIncidencias <= 1}
                 onClick={() => setPaginaIncidencias(paginaIncidencias - 1)}
               >◀ Anterior</button>
 
@@ -216,6 +219,7 @@ function Administracion() {
 
               <button 
                 className="btn btn-outline-secondary mx-1"
+                disabled={paginaIncidencias >= totalPaginasIncidencias}
                 onClick={() => setPaginaIncidencias(paginaIncidencias + 1)}
               >Siguiente ▶</button>
             </div>
