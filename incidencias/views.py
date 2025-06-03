@@ -81,6 +81,17 @@ def cambiar_password_api(request):
         return Response({'success': 'Contraseña actualizada'})
     except User.DoesNotExist:
         return Response({'error': 'Usuario no encontrado'}, status=404)
+    
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def eliminar_usuario_api(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        user.delete()
+        return Response({'success': 'Usuario eliminado'})
+    except User.DoesNotExist:
+        return Response({'error': 'Usuario no encontrado'}, status=404)
+
 
 
 

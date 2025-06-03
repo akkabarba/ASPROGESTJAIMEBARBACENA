@@ -3,7 +3,7 @@ from pathlib import Path
 import dj_database_url
 from corsheaders.defaults import default_headers
 from dotenv import load_dotenv
-
+from datetime import timedelta
 # Carga el archivo .env
 load_dotenv()
 
@@ -108,3 +108,12 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 5,
 }
 
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24),   # token válido 24 horas
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # refresh válido 7 días
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'UPDATE_LAST_LOGIN': True,
+}

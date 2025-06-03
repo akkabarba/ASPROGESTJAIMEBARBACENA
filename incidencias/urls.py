@@ -13,6 +13,7 @@ urlpatterns = [
     path('whoami/', views.whoami, name='whoami'),
     path('crear_usuario/', views.crear_usuario_api, name='crear_usuario_api'),
     path('usuarios/', views.listar_usuarios_api, name='listar_usuarios_api'),
+    path('usuarios/<int:user_id>/', views.eliminar_usuario_api),
     path('incidencias_nuevas/', views.contar_incidencias_nuevas, name='contar_incidencias_nuevas'),
     path('cambiar_password/', views.cambiar_password_api, name='cambiar_password_api'),
     path('', include(router.urls)),  
