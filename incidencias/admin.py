@@ -2,8 +2,8 @@ from django.contrib import admin
 
 # Register your models here.
 from django.contrib import admin
-from .models import Empleado, Dispositivo, Incidencia
+from .models import Incidencia, Equipo
 
-admin.site.register(Empleado)
-admin.site.register(Dispositivo)
+
 admin.site.register(Incidencia)
+admin.site.register(Equipo)
