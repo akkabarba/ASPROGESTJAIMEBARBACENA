@@ -22,11 +22,18 @@ function Navbar({ usuario, setVista, onLogout }) {
             </li>
 
             {usuario?.is_superuser && (
-              <li className="nav-item">
-                <button className="btn btn-link nav-link" onClick={() => setVista('admin')}>
-                  Administración
-                </button>
-              </li>
+              <>
+                <li className="nav-item"><button className="btn btn-link nav-link" onClick={() => setVista('admin')}>Administración</button></li>
+                <li className="nav-item dropdown">
+                  <button className="btn btn-link nav-link dropdown-toggle" id="equiposDropdown" data-bs-toggle="dropdown">Equipos</button>
+                  <ul className="dropdown-menu">
+                    <li><button className="dropdown-item" onClick={() => setVista('ordenadores')}>Ordenadores</button></li>
+                    <li><button className="dropdown-item" onClick={() => setVista('telefonos')}>Teléfonos</button></li>
+                    <li><button className="dropdown-item" onClick={() => setVista('impresoras')}>Impresoras</button></li>
+                    <li><button className="dropdown-item" onClick={() => setVista('red')}>Equipos de Red</button></li>
+                  </ul>
+                </li>
+              </>
             )}
           </ul>
 

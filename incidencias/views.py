@@ -2,9 +2,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework import viewsets, filters
 from django.contrib.auth.models import User
-from .models import Incidencia
-from .serializers import IncidenciaSerializer, CustomTokenObtainPairSerializer
+from .models import Incidencia, Equipo
+from .serializers import IncidenciaSerializer, CustomTokenObtainPairSerializer, EquipoSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.pagination import PageNumberPagination
 
@@ -141,3 +142,34 @@ def contar_incidencias_nuevas(request):
 
 token_obtain_pair = CustomTokenObtainPairView.as_view()
 token_refresh = TokenRefreshView.as_view()
+
+# ==========================
+# API REST EQUIPOS
+# ==========================
+
+class EquipoPagination(PageNumberPagination):
+    page_size = 5
+
+class OrdenadorViewSet(viewsets.ModelViewSet):
+    queryset = Equipo.objects.filter(tipo='ordenador')
+    serializer_class = EquipoSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = EquipoPagination
+
+class TelefonoViewSet(viewsets.ModelViewSet):
+    queryset = Equipo.objects.filter(tipo='telefono')
+    serializer_class = EquipoSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = EquipoPagination
+
+class ImpresoraViewSet(viewsets.ModelViewSet):
+    queryset = Equipo.objects.filter(tipo='impresora')
+    serializer_class = EquipoSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = EquipoPagination
+
+class RedViewSet(viewsets.ModelViewSet):
+    queryset = Equipo.objects.filter(tipo='red')
+    serializer_class = EquipoSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = EquipoPagination

@@ -5,6 +5,10 @@
   import CrearIncidencia from './components/CrearIncidencia';
   import ListadoIncidencias from './components/ListadoIncidencias';
   import Administracion from './components/Administracion';
+  import Ordenadores from './components/Ordenadores';
+  import Telefonos from './components/Telefonos';
+  import Impresoras from './components/Impresoras';
+  import Red from './components/Red';
   import Home from './components/Home';
   import API_BASE from './utils/config';
 
@@ -55,6 +59,10 @@
       {vista === 'crear' && <CrearIncidencia />}
       {vista === 'mis' && <ListadoIncidencias usuario={usuario} />}
       {vista === 'admin' && usuario.is_superuser && <Administracion />}
+      {vista === 'ordenadores' && <Ordenadores />}
+      {vista === 'telefonos' && <Telefonos />}
+      {vista === 'impresoras' && <Impresoras />}
+      {vista === 'red' && <Red />}
     </>
   )}
 

@@ -1,11 +1,15 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .views import IncidenciaViewSet
+from .views import IncidenciaViewSet, OrdenadorViewSet, TelefonoViewSet, ImpresoraViewSet, RedViewSet
 
 
 router = DefaultRouter()
 router.register(r'incidencias', IncidenciaViewSet, basename='incidencias')
+router.register(r'equipos/ordenadores', OrdenadorViewSet, basename='ordenadores')
+router.register(r'equipos/telefonos', TelefonoViewSet, basename='telefonos')
+router.register(r'equipos/impresoras', ImpresoraViewSet, basename='impresoras')
+router.register(r'equipos/red', RedViewSet, basename='red')
 
 urlpatterns = [
     path('token/', views.token_obtain_pair, name='token_obtain_pair'),
