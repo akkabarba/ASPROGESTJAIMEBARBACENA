@@ -7,6 +7,7 @@ function Telefonos() {
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [mensaje, setMensaje] = useState('');
+  const [seleccionado, setSeleccionado] = useState(null);
   const [form, setForm] = useState({
     centro: '', puesto: '', marca: '', modelo: '', numero_serie: '', imei: '', desbloqueo: '',
     datos_sim: '', pin: '', puk1: '', puk2: '', ext_vpn: '', fijo: '', tarifa: '', restriccion: '', linea: ''
@@ -58,131 +59,145 @@ function Telefonos() {
 
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
 
-      <form onSubmit={handleSubmit} className="mb-5">
-        <div className="row g-2">
-          <div className="col-md-4">
-            <label>Centro:</label>
-            <select name="centro" className="form-select" value={form.centro} onChange={handleChange} required>
-              <option value="">Selecciona centro...</option>
-              <option value="CENTRAL">CENTRAL</option>
-              <option value="CPM I">CPM I</option>
-              <option value="CPM II">CPM II</option>
-              <option value="RGA III">RGA III</option>
-              <option value="CPM IV">CPM IV</option>
-              <option value="DISL V">OISL V</option>
-              <option value="CPM VII">CPM VII</option>
-              <option value="CPM X">CPM X</option>
-              <option value="ISL XI">ISL XI</option>
-              <option value="ISL XII">ISL XII</option>
-              <option value="ISL XIII">ISL XIII</option>
-              <option value="CAL XIV">CAI XIV</option>
-              <option value="CPM XV">CPM XV</option>
-            </select>
-          </div>
+      {!seleccionado ? (
+        <>
+          <form onSubmit={handleSubmit} className="mb-5">
+            <div className="row g-2">
+              <div className="col-md-4">
+                <label>Centro:</label>
+                <select name="centro" className="form-select" value={form.centro} onChange={handleChange} required>
+                  <option value="">Selecciona centro...</option>
+                  <option value="CENTRAL">CENTRAL</option>
+                  <option value="CPM I">CPM I</option>
+                  <option value="CPM II">CPM II</option>
+                  <option value="RGA III">RGA III</option>
+                  <option value="CPM IV">CPM IV</option>
+                  <option value="DISL V">OISL V</option>
+                  <option value="CPM VII">CPM VII</option>
+                  <option value="CPM X">CPM X</option>
+                  <option value="ISL XI">ISL XI</option>
+                  <option value="ISL XII">ISL XII</option>
+                  <option value="ISL XIII">ISL XIII</option>
+                  <option value="CAL XIV">CAI XIV</option>
+                  <option value="CPM XV">CPM XV</option>
+                </select>
+              </div>
 
-          <div className="col-md-4">
-            <label>Puesto:</label>
-            <input name="puesto" className="form-control" value={form.puesto} onChange={handleChange} />
-          </div>
+              <div className="col-md-4">
+                <label>Puesto:</label>
+                <input name="puesto" className="form-control" value={form.puesto} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-4">
-            <label>Línea:</label>
-            <input name="linea" className="form-control" value={form.linea} onChange={handleChange} />
-          </div>
+              <div className="col-md-4">
+                <label>Línea:</label>
+                <input name="linea" className="form-control" value={form.linea} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-4">
-            <label>Marca:</label>
-            <input name="marca" className="form-control" value={form.marca} onChange={handleChange} />
-          </div>
+              <div className="col-md-4">
+                <label>Marca:</label>
+                <input name="marca" className="form-control" value={form.marca} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-4">
-            <label>Modelo:</label>
-            <input name="modelo" className="form-control" value={form.modelo} onChange={handleChange} />
-          </div>
+              <div className="col-md-4">
+                <label>Modelo:</label>
+                <input name="modelo" className="form-control" value={form.modelo} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-4">
-            <label>Nº serie:</label>
-            <input name="numero_serie" className="form-control" value={form.numero_serie} onChange={handleChange} />
-          </div>
+              <div className="col-md-4">
+                <label>Nº serie:</label>
+                <input name="numero_serie" className="form-control" value={form.numero_serie} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-4">
-            <label>IMEI:</label>
-            <input name="imei" className="form-control" value={form.imei} onChange={handleChange} />
-          </div>
+              <div className="col-md-4">
+                <label>IMEI:</label>
+                <input name="imei" className="form-control" value={form.imei} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-4">
-            <label>Desbloqueo:</label>
-            <input name="desbloqueo" className="form-control" value={form.desbloqueo} onChange={handleChange} />
-          </div>
+              <div className="col-md-4">
+                <label>Desbloqueo:</label>
+                <input name="desbloqueo" className="form-control" value={form.desbloqueo} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-4">
-            <label>Datos SIM:</label>
-            <input name="datos_sim" className="form-control" value={form.datos_sim} onChange={handleChange} />
-          </div>
+              <div className="col-md-4">
+                <label>Datos SIM:</label>
+                <input name="datos_sim" className="form-control" value={form.datos_sim} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-3">
-            <label>PIN:</label>
-            <input name="pin" className="form-control" value={form.pin} onChange={handleChange} />
-          </div>
+              <div className="col-md-3">
+                <label>PIN:</label>
+                <input name="pin" className="form-control" value={form.pin} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-3">
-            <label>PUK1:</label>
-            <input name="puk1" className="form-control" value={form.puk1} onChange={handleChange} />
-          </div>
+              <div className="col-md-3">
+                <label>PUK1:</label>
+                <input name="puk1" className="form-control" value={form.puk1} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-3">
-            <label>PUK2:</label>
-            <input name="puk2" className="form-control" value={form.puk2} onChange={handleChange} />
-          </div>
+              <div className="col-md-3">
+                <label>PUK2:</label>
+                <input name="puk2" className="form-control" value={form.puk2} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-3">
-            <label>Ext VPN:</label>
-            <input name="ext_vpn" className="form-control" value={form.ext_vpn} onChange={handleChange} />
-          </div>
+              <div className="col-md-3">
+                <label>Ext VPN:</label>
+                <input name="ext_vpn" className="form-control" value={form.ext_vpn} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-4">
-            <label>Fijo:</label>
-            <input name="fijo" className="form-control" value={form.fijo} onChange={handleChange} />
-          </div>
+              <div className="col-md-4">
+                <label>Fijo:</label>
+                <input name="fijo" className="form-control" value={form.fijo} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-4">
-            <label>Tarifa:</label>
-            <input name="tarifa" className="form-control" value={form.tarifa} onChange={handleChange} />
-          </div>
+              <div className="col-md-4">
+                <label>Tarifa:</label>
+                <input name="tarifa" className="form-control" value={form.tarifa} onChange={handleChange} />
+              </div>
 
-          <div className="col-md-4">
-            <label>Restricción:</label>
-            <input name="restriccion" className="form-control" value={form.restriccion} onChange={handleChange} />
+              <div className="col-md-4">
+                <label>Restricción:</label>
+                <input name="restriccion" className="form-control" value={form.restriccion} onChange={handleChange} />
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-success mt-4" disabled={cargando}>
+              {cargando ? (
+                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              ) : (
+                'Crear teléfono'
+              )}
+            </button>
+          </form>
+
+          <h5 className="mb-3">Listado</h5>
+
+          {telefonos.map(tel => (
+            <div key={tel.id} className="card mb-3 shadow-sm" style={{ cursor: 'pointer' }}
+              onClick={() => setSeleccionado(tel)}>
+              <div className="card-body">
+                <h5>{tel.marca} {tel.modelo} - {tel.centro}</h5>
+                <p>IMEI: {tel.imei} — Nº serie: {tel.numero_serie}</p>
+                <p><strong>Línea:</strong> {tel.linea} — <strong>Tarifa:</strong> {tel.tarifa}</p>
+              </div>
+            </div>
+          ))}
+
+          <div className="text-center my-3">
+            <button className="btn btn-secondary mx-2" disabled={pagina <= 1} onClick={() => setPagina(p => p - 1)}>Anterior</button>
+            Página {pagina} de {totalPaginas}
+            <button className="btn btn-secondary mx-2" disabled={pagina >= totalPaginas} onClick={() => setPagina(p => p + 1)}>Siguiente</button>
+          </div>
+        </>
+      ) : (
+        <div className="card shadow p-4">
+          <h4>Detalles del teléfono</h4>
+          {Object.entries(seleccionado).map(([key, value]) => (
+            <p key={key}><b>{key.replaceAll('_', ' ')}:</b> {value}</p>
+          ))}
+          <div className="text-center">
+            <button className="btn btn-secondary mt-3" onClick={() => setSeleccionado(null)}>Volver</button>
           </div>
         </div>
-
-        <button type="submit" className="btn btn-success mt-4" disabled={cargando}>
-          {cargando ? (
-            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          ) : (
-            'Crear teléfono'
-          )}
-        </button>
-      </form>
-
-      <h5 className="mb-3">Listado</h5>
-
-      {telefonos.map(tel => (
-        <div key={tel.id} className="card mb-3 shadow-sm">
-          <div className="card-body">
-            <h5>{tel.marca} {tel.modelo} - {tel.centro}</h5>
-            <p>IMEI: {tel.imei} — Nº serie: {tel.numero_serie}</p>
-            <p><strong>Línea:</strong> {tel.linea} — <strong>Tarifa:</strong> {tel.tarifa}</p>
-          </div>
-        </div>
-      ))}
-
-      <div className="text-center my-3">
-        <button className="btn btn-secondary mx-2" disabled={pagina <= 1} onClick={() => setPagina(p => p - 1)}>Anterior</button>
-        Página {pagina} de {totalPaginas}
-        <button className="btn btn-secondary mx-2" disabled={pagina >= totalPaginas} onClick={() => setPagina(p => p + 1)}>Siguiente</button>
-      </div>
-
+      )}
     </div>
   );
 }
