@@ -2,25 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { refreshTokenIfNeeded } from '../utils/auth';
 import API_BASE from '../utils/config';
 
-function Ordenadores() {
-  const [ordenadores, setOrdenadores] = useState([]);
+function Telefonos() {
+  const [telefonos, setTelefonos] = useState([]);
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
+  const [mensaje, setMensaje] = useState('');
   const [form, setForm] = useState({
-    centro: '', empresa: '', tipo_equipo: '', marca: '', modelo: '',
-    numero_serie: '', fecha_compra: '', garantia: '', sistema_operativo: '',
-    nombre_equipo: '', cuenta_usuario: '', clave: '', descripcion_estado: '',
-    observaciones: '', registro: ''
+    centro: '', puesto: '', marca: '', modelo: '', numero_serie: '', imei: '', desbloqueo: '',
+    datos_sim: '', pin: '', puk1: '', puk2: '', ext_vpn: '', fijo: '', tarifa: '', restriccion: '', linea: ''
   });
   const [cargando, setCargando] = useState(false);
 
   const cargarDatos = async () => {
     const token = await refreshTokenIfNeeded();
-    const res = await fetch(`${API_BASE}/ordenadores/?page=${pagina}`, {
+    const res = await fetch(`${API_BASE}/telefonos/?page=${pagina}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
-    setOrdenadores(data.results);
+    setTelefonos(data.results);
     setTotalPaginas(Math.ceil(data.count / 5));
   };
 
@@ -35,19 +34,30 @@ function Ordenadores() {
     e.preventDefault();
     setCargando(true);
     const token = await refreshTokenIfNeeded();
-    await fetch(`${API_BASE}/ordenadores/`, {
+    const res = await fetch(`${API_BASE}/telefonos/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(form)
     });
-    setForm({ centro: '', empresa: '', tipo_equipo: '', marca: '', modelo: '', numero_serie: '', fecha_compra: '', garantia: '', sistema_operativo: '', nombre_equipo: '', cuenta_usuario: '', clave: '', descripcion_estado: '', observaciones: '', registro: '' });
+
+    if (res.ok) {
+      setMensaje('✅ Teléfono creado correctamente');
+      setTimeout(() => setMensaje(''), 3000);
+      setForm({
+        centro: '', puesto: '', marca: '', modelo: '', numero_serie: '', imei: '', desbloqueo: '',
+        datos_sim: '', pin: '', puk1: '', puk2: '', ext_vpn: '', fijo: '', tarifa: '', restriccion: '', linea: ''
+      });
+      cargarDatos();
+    }
     setCargando(false);
-    cargarDatos();
   };
 
   return (
     <div className="container mt-4">
-      <h3>Registro de ordenadores</h3>
+      <h3>Registro de teléfonos</h3>
+
+      {mensaje && <div className="alert alert-success">{mensaje}</div>}
+
       <form onSubmit={handleSubmit} className="mb-5">
         <div className="row g-2">
           <div className="col-md-4">
@@ -71,89 +81,98 @@ function Ordenadores() {
           </div>
 
           <div className="col-md-4">
-            <label>Empresa:</label>
-            <input type="text" name="empresa" className="form-control" value={form.empresa} onChange={handleChange} />
+            <label>Puesto:</label>
+            <input name="puesto" className="form-control" value={form.puesto} onChange={handleChange} />
           </div>
 
           <div className="col-md-4">
-            <label>Tipo equipo:</label>
-            <input type="text" name="tipo_equipo" className="form-control" value={form.tipo_equipo} onChange={handleChange} />
+            <label>Línea:</label>
+            <input name="linea" className="form-control" value={form.linea} onChange={handleChange} />
           </div>
 
           <div className="col-md-4">
             <label>Marca:</label>
-            <input type="text" name="marca" className="form-control" value={form.marca} onChange={handleChange} />
+            <input name="marca" className="form-control" value={form.marca} onChange={handleChange} />
           </div>
 
           <div className="col-md-4">
             <label>Modelo:</label>
-            <input type="text" name="modelo" className="form-control" value={form.modelo} onChange={handleChange} />
+            <input name="modelo" className="form-control" value={form.modelo} onChange={handleChange} />
           </div>
 
           <div className="col-md-4">
-            <label>Número serie:</label>
-            <input type="text" name="numero_serie" className="form-control" value={form.numero_serie} onChange={handleChange} />
+            <label>Nº serie:</label>
+            <input name="numero_serie" className="form-control" value={form.numero_serie} onChange={handleChange} />
           </div>
 
           <div className="col-md-4">
-            <label>Fecha compra:</label>
-            <input type="date" name="fecha_compra" className="form-control" value={form.fecha_compra} onChange={handleChange} />
+            <label>IMEI:</label>
+            <input name="imei" className="form-control" value={form.imei} onChange={handleChange} />
           </div>
 
           <div className="col-md-4">
-            <label>Garantía:</label>
-            <input type="date" name="garantia" className="form-control" value={form.garantia} onChange={handleChange} />
+            <label>Desbloqueo:</label>
+            <input name="desbloqueo" className="form-control" value={form.desbloqueo} onChange={handleChange} />
           </div>
 
           <div className="col-md-4">
-            <label>Sistema operativo:</label>
-            <input type="text" name="sistema_operativo" className="form-control" value={form.sistema_operativo} onChange={handleChange} />
+            <label>Datos SIM:</label>
+            <input name="datos_sim" className="form-control" value={form.datos_sim} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-3">
+            <label>PIN:</label>
+            <input name="pin" className="form-control" value={form.pin} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-3">
+            <label>PUK1:</label>
+            <input name="puk1" className="form-control" value={form.puk1} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-3">
+            <label>PUK2:</label>
+            <input name="puk2" className="form-control" value={form.puk2} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-3">
+            <label>Ext VPN:</label>
+            <input name="ext_vpn" className="form-control" value={form.ext_vpn} onChange={handleChange} />
           </div>
 
           <div className="col-md-4">
-            <label>Nombre equipo:</label>
-            <input type="text" name="nombre_equipo" className="form-control" value={form.nombre_equipo} onChange={handleChange} />
+            <label>Fijo:</label>
+            <input name="fijo" className="form-control" value={form.fijo} onChange={handleChange} />
           </div>
 
           <div className="col-md-4">
-            <label>Cuenta usuario:</label>
-            <input type="text" name="cuenta_usuario" className="form-control" value={form.cuenta_usuario} onChange={handleChange} />
+            <label>Tarifa:</label>
+            <input name="tarifa" className="form-control" value={form.tarifa} onChange={handleChange} />
           </div>
 
           <div className="col-md-4">
-            <label>Clave:</label>
-            <input type="text" name="clave" className="form-control" value={form.clave} onChange={handleChange} />
+            <label>Restricción:</label>
+            <input name="restriccion" className="form-control" value={form.restriccion} onChange={handleChange} />
           </div>
-
-          <div className="col-md-6">
-            <label>Descripción estado:</label>
-            <textarea name="descripcion_estado" className="form-control" value={form.descripcion_estado} onChange={handleChange} />
-          </div>
-
-          <div className="col-md-6">
-            <label>Observaciones:</label>
-            <textarea name="observaciones" className="form-control" value={form.observaciones} onChange={handleChange} />
-          </div>
-
-          <div className="col-md-12">
-            <label>Registro:</label>
-            <textarea name="registro" className="form-control" value={form.registro} onChange={handleChange} />
-          </div>
-
         </div>
 
         <button type="submit" className="btn btn-success mt-4" disabled={cargando}>
-          {cargando ? "Guardando..." : "Crear ordenador"}
+          {cargando ? (
+            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          ) : (
+            'Crear teléfono'
+          )}
         </button>
       </form>
 
       <h5 className="mb-3">Listado</h5>
 
-      {ordenadores.map(ord => (
-        <div key={ord.id} className="card mb-3 shadow-sm">
+      {telefonos.map(tel => (
+        <div key={tel.id} className="card mb-3 shadow-sm">
           <div className="card-body">
-            <h5>{ord.marca} {ord.modelo} - {ord.centro}</h5>
-            <p>{ord.empresa} - SN: {ord.numero_serie}</p>
+            <h5>{tel.marca} {tel.modelo} - {tel.centro}</h5>
+            <p>IMEI: {tel.imei} — Nº serie: {tel.numero_serie}</p>
+            <p><strong>Línea:</strong> {tel.linea} — <strong>Tarifa:</strong> {tel.tarifa}</p>
           </div>
         </div>
       ))}
@@ -168,4 +187,4 @@ function Ordenadores() {
   );
 }
 
-export default Ordenadores;
+export default Telefonos;

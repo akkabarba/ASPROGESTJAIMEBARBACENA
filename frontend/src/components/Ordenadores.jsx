@@ -6,6 +6,7 @@ function Ordenadores() {
   const [ordenadores, setOrdenadores] = useState([]);
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
+  const [mensaje, setMensaje] = useState('');
   const [form, setForm] = useState({
     centro: '', empresa: '', tipo_equipo: '', marca: '', modelo: '',
     numero_serie: '', fecha_compra: '', garantia: '', sistema_operativo: '',
@@ -35,19 +36,33 @@ function Ordenadores() {
     e.preventDefault();
     setCargando(true);
     const token = await refreshTokenIfNeeded();
-    await fetch(`${API_BASE}/ordenadores/`, {
+    const res = await fetch(`${API_BASE}/ordenadores/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(form)
     });
-    setForm({ centro: '', empresa: '', tipo_equipo: '', marca: '', modelo: '', numero_serie: '', fecha_compra: '', garantia: '', sistema_operativo: '', nombre_equipo: '', cuenta_usuario: '', clave: '', descripcion_estado: '', observaciones: '', registro: '' });
+
+    if (res.ok) {
+      setMensaje('✅ Ordenador creado correctamente');
+      setTimeout(() => setMensaje(''), 3000);
+      setForm({
+        centro: '', empresa: '', tipo_equipo: '', marca: '', modelo: '',
+        numero_serie: '', fecha_compra: '', garantia: '', sistema_operativo: '',
+        nombre_equipo: '', cuenta_usuario: '', clave: '', descripcion_estado: '',
+        observaciones: '', registro: ''
+      });
+      cargarDatos();
+    }
+
     setCargando(false);
-    cargarDatos();
   };
 
   return (
     <div className="container mt-4">
       <h3>Registro de ordenadores</h3>
+
+      {mensaje && <div className="alert alert-success">{mensaje}</div>}
+
       <form onSubmit={handleSubmit} className="mb-5">
         <div className="row g-2">
           <div className="col-md-4">
@@ -139,11 +154,14 @@ function Ordenadores() {
             <label>Registro:</label>
             <textarea name="registro" className="form-control" value={form.registro} onChange={handleChange} />
           </div>
-
         </div>
 
         <button type="submit" className="btn btn-success mt-4" disabled={cargando}>
-          {cargando ? "Guardando..." : "Crear ordenador"}
+          {cargando ? (
+            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          ) : (
+            'Crear ordenador'
+          )}
         </button>
       </form>
 
@@ -154,6 +172,7 @@ function Ordenadores() {
           <div className="card-body">
             <h5>{ord.marca} {ord.modelo} - {ord.centro}</h5>
             <p>{ord.empresa} - SN: {ord.numero_serie}</p>
+            <p><strong>Usuario:</strong> {ord.cuenta_usuario} — <strong>SO:</strong> {ord.sistema_operativo}</p>
           </div>
         </div>
       ))}
