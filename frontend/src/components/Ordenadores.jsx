@@ -4,22 +4,19 @@ import API_BASE from '../utils/config';
 
 function Ordenadores() {
   const [ordenadores, setOrdenadores] = useState([]);
-  const [form, setForm] = useState({
-    centro: '', empresa: '', tipo_equipo: '', marca: '', modelo: '', numero_serie: '',
-    fecha_compra: '', garantia: '', sistema_operativo: '', nombre_equipo: '',
-    cuenta_usuario: '', clave: '', descripcion_estado: '', observaciones: ''
-  });
   const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
-  const centros = [
-    'CENTRAL', 'CPM I', 'CPM II', 'RGA III', 'CPM IV',
-    'OISL V', 'CPM VII', 'CPM X', 'ISL XI', 'ISL XII',
-    'ISL XIII', 'CAI XIV', 'CPM XV'
-  ];
+  const [form, setForm] = useState({
+    centro: '', empresa: '', tipo_equipo: '', marca: '', modelo: '',
+    numero_serie: '', fecha_compra: '', garantia: '', sistema_operativo: '',
+    nombre_equipo: '', cuenta_usuario: '', clave: '', descripcion_estado: '',
+    observaciones: '', registro: ''
+  });
+  const [cargando, setCargando] = useState(false);
 
   const cargarDatos = async () => {
     const token = await refreshTokenIfNeeded();
-    const res = await fetch(`${API_BASE}/equipos/ordenadores/?page=${pagina}`, {
+    const res = await fetch(`${API_BASE}/ordenadores/?page=${pagina}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -27,60 +24,146 @@ function Ordenadores() {
     setTotalPaginas(Math.ceil(data.count / 5));
   };
 
-  useEffect(() => { cargarDatos(); }, [pagina]);
+  useEffect(() => { cargarDatos() }, [pagina]);
 
-  const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(f => ({ ...f, [name]: value }));
+  };
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setCargando(true);
     const token = await refreshTokenIfNeeded();
-    await fetch(`${API_BASE}/equipos/ordenadores/`, {
+    await fetch(`${API_BASE}/ordenadores/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(form)
     });
-    setForm({ centro: '', empresa: '', tipo_equipo: '', marca: '', modelo: '', numero_serie: '', fecha_compra: '', garantia: '', sistema_operativo: '', nombre_equipo: '', cuenta_usuario: '', clave: '', descripcion_estado: '', observaciones: '' });
+    setForm({ centro: '', empresa: '', tipo_equipo: '', marca: '', modelo: '', numero_serie: '', fecha_compra: '', garantia: '', sistema_operativo: '', nombre_equipo: '', cuenta_usuario: '', clave: '', descripcion_estado: '', observaciones: '', registro: '' });
+    setCargando(false);
     cargarDatos();
   };
 
   return (
     <div className="container mt-4">
-      <h3>Gestión de Ordenadores</h3>
-      <form onSubmit={handleSubmit} className="card p-3 mb-4">
-        <label>Centro:</label>
-        <select className="form-select mb-2" name="centro" value={form.centro} onChange={handleChange}>
-          <option value="">Selecciona centro</option>
-          {centros.map(c => <option key={c}>{c}</option>)}
-        </select>
+      <h3>Registro de ordenadores</h3>
+      <form onSubmit={handleSubmit} className="mb-5">
+        <div className="row g-2">
+          <div className="col-md-4">
+            <label>Centro:</label>
+            <select name="centro" className="form-select" value={form.centro} onChange={handleChange} required>
+              <option value="">Selecciona centro...</option>
+              <option value="CENTRAL">CENTRAL</option>
+              <option value="CPM I">CPM I</option>
+              <option value="CPM II">CPM II</option>
+              <option value="RGA III">RGA III</option>
+              <option value="CPM IV">CPM IV</option>
+              <option value="DISL V">OISL V</option>
+              <option value="CPM VII">CPM VII</option>
+              <option value="CPM X">CPM X</option>
+              <option value="ISL XI">ISL XI</option>
+              <option value="ISL XII">ISL XII</option>
+              <option value="ISL XIII">ISL XIII</option>
+              <option value="CAL XIV">CAI XIV</option>
+              <option value="CPM XV">CPM XV</option>
+            </select>
+          </div>
 
-        <label>Empresa:</label><input className="form-control mb-2" name="empresa" value={form.empresa} onChange={handleChange} />
-        <label>Tipo equipo:</label><input className="form-control mb-2" name="tipo_equipo" value={form.tipo_equipo} onChange={handleChange} />
-        <label>Marca:</label><input className="form-control mb-2" name="marca" value={form.marca} onChange={handleChange} />
-        <label>Modelo:</label><input className="form-control mb-2" name="modelo" value={form.modelo} onChange={handleChange} />
-        <label>Número serie:</label><input className="form-control mb-2" name="numero_serie" value={form.numero_serie} onChange={handleChange} />
-        <label>Fecha compra:</label><input className="form-control mb-2" type="date" name="fecha_compra" value={form.fecha_compra} onChange={handleChange} />
-        <label>Garantía:</label><input className="form-control mb-2" type="date" name="garantia" value={form.garantia} onChange={handleChange} />
-        <label>Sistema operativo:</label><input className="form-control mb-2" name="sistema_operativo" value={form.sistema_operativo} onChange={handleChange} />
-        <label>Nombre equipo:</label><input className="form-control mb-2" name="nombre_equipo" value={form.nombre_equipo} onChange={handleChange} />
-        <label>Cuenta usuario:</label><textarea className="form-control mb-2" name="cuenta_usuario" value={form.cuenta_usuario} onChange={handleChange} />
-        <label>Clave:</label><textarea className="form-control mb-2" name="clave" value={form.clave} onChange={handleChange} />
-        <label>Descripción estado:</label><textarea className="form-control mb-2" name="descripcion_estado" value={form.descripcion_estado} onChange={handleChange} />
-        <label>Observaciones:</label><textarea className="form-control mb-2" name="observaciones" value={form.observaciones} onChange={handleChange} />
-        <button type="submit" className="btn btn-success">Crear ordenador</button>
+          <div className="col-md-4">
+            <label>Empresa:</label>
+            <input type="text" name="empresa" className="form-control" value={form.empresa} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-4">
+            <label>Tipo equipo:</label>
+            <input type="text" name="tipo_equipo" className="form-control" value={form.tipo_equipo} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-4">
+            <label>Marca:</label>
+            <input type="text" name="marca" className="form-control" value={form.marca} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-4">
+            <label>Modelo:</label>
+            <input type="text" name="modelo" className="form-control" value={form.modelo} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-4">
+            <label>Número serie:</label>
+            <input type="text" name="numero_serie" className="form-control" value={form.numero_serie} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-4">
+            <label>Fecha compra:</label>
+            <input type="date" name="fecha_compra" className="form-control" value={form.fecha_compra} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-4">
+            <label>Garantía:</label>
+            <input type="date" name="garantia" className="form-control" value={form.garantia} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-4">
+            <label>Sistema operativo:</label>
+            <input type="text" name="sistema_operativo" className="form-control" value={form.sistema_operativo} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-4">
+            <label>Nombre equipo:</label>
+            <input type="text" name="nombre_equipo" className="form-control" value={form.nombre_equipo} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-4">
+            <label>Cuenta usuario:</label>
+            <input type="text" name="cuenta_usuario" className="form-control" value={form.cuenta_usuario} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-4">
+            <label>Clave:</label>
+            <input type="text" name="clave" className="form-control" value={form.clave} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-6">
+            <label>Descripción estado:</label>
+            <textarea name="descripcion_estado" className="form-control" value={form.descripcion_estado} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-6">
+            <label>Observaciones:</label>
+            <textarea name="observaciones" className="form-control" value={form.observaciones} onChange={handleChange} />
+          </div>
+
+          <div className="col-md-12">
+            <label>Registro:</label>
+            <textarea name="registro" className="form-control" value={form.registro} onChange={handleChange} />
+          </div>
+
+        </div>
+
+        <button type="submit" className="btn btn-success mt-4" disabled={cargando}>
+          {cargando ? "Guardando..." : "Crear ordenador"}
+        </button>
       </form>
 
-      <h5>Listado:</h5>
-      {ordenadores.map(o => (
-        <div key={o.id} className="card mb-2 p-2">
-          <b>{o.centro} - {o.marca} {o.modelo}</b>
+      <h5 className="mb-3">Listado</h5>
+
+      {ordenadores.map(ord => (
+        <div key={ord.id} className="card mb-3 shadow-sm">
+          <div className="card-body">
+            <h5>{ord.marca} {ord.modelo} - {ord.centro}</h5>
+            <p>{ord.empresa} - SN: {ord.numero_serie}</p>
+          </div>
         </div>
       ))}
 
       <div className="text-center my-3">
-        <button className="btn btn-outline-secondary mx-1" disabled={pagina <= 1} onClick={() => setPagina(pagina - 1)}>◀</button>
+        <button className="btn btn-secondary mx-2" disabled={pagina <= 1} onClick={() => setPagina(p => p - 1)}>Anterior</button>
         Página {pagina} de {totalPaginas}
-        <button className="btn btn-outline-secondary mx-1" disabled={pagina >= totalPaginas} onClick={() => setPagina(pagina + 1)}>▶</button>
+        <button className="btn btn-secondary mx-2" disabled={pagina >= totalPaginas} onClick={() => setPagina(p => p + 1)}>Siguiente</button>
       </div>
+
     </div>
   );
 }

@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 
 function Navbar({ usuario, setVista, onLogout }) {
-  const [equiposOpen, setEquiposOpen] = useState(false);
+  const [showEquipos, setShowEquipos] = useState(false);
 
-  const toggleEquipos = () => setEquiposOpen(!equiposOpen);
-  const closeMenu = () => setEquiposOpen(false);
+  const toggleEquipos = () => {
+    setShowEquipos(!showEquipos);
+  };
+
+  const handleSelectVista = (vista) => {
+    setVista(vista);
+    setShowEquipos(false);  // Cierra el dropdown al seleccionar
+  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary px-4 rounded shadow">
@@ -35,19 +41,18 @@ function Navbar({ usuario, setVista, onLogout }) {
                   </button>
                 </li>
 
-                <li className="nav-item">
-                  <div className="btn-group">
-                    <button className="btn btn-link nav-link dropdown-toggle" onClick={toggleEquipos}>
-                      Equipos
-                    </button>
-                    {equiposOpen && (
-                      <div className="dropdown-menu show">
-                        <button className="dropdown-item" onClick={() => { setVista('ordenadores'); closeMenu(); }}>Ordenadores</button>
-                        <button className="dropdown-item" onClick={() => { setVista('telefonos'); closeMenu(); }}>Teléfonos</button>
-                        <button className="dropdown-item" onClick={() => { setVista('impresoras'); closeMenu(); }}>Impresoras</button>
-                        <button className="dropdown-item" onClick={() => { setVista('red'); closeMenu(); }}>Equipos de Red</button>
-                      </div>
-                    )}
+                <li className="nav-item position-relative">
+                  <button className="btn btn-link nav-link" onClick={toggleEquipos}>
+                    Equipos ▼
+                  </button>
+                  
+                  {/* Submenú animado */}
+                  <div className={`dropdown-menu show ${showEquipos ? 'dropdown-fade-in' : 'dropdown-fade-out'}`} 
+                       style={{ position: 'absolute', top: '100%', transition: 'opacity 0.3s ease' }}>
+                    <button className="dropdown-item" onClick={() => handleSelectVista('ordenadores')}>Ordenadores</button>
+                    <button className="dropdown-item" onClick={() => handleSelectVista('telefonos')}>Teléfonos</button>
+                    <button className="dropdown-item" onClick={() => handleSelectVista('impresoras')}>Impresoras</button>
+                    <button className="dropdown-item" onClick={() => handleSelectVista('red')}>Equipos de Red</button>
                   </div>
                 </li>
               </>
@@ -55,9 +60,7 @@ function Navbar({ usuario, setVista, onLogout }) {
           </ul>
 
           <span className="navbar-text me-3">Bienvenido, <strong>{usuario.username}</strong></span>
-          <button className="btn btn-outline-light" onClick={onLogout}>
-            Cerrar sesión
-          </button>
+          <button className="btn btn-outline-light" onClick={onLogout}>Cerrar sesión</button>
         </div>
       </div>
     </nav>
