@@ -6,10 +6,10 @@ from .views import IncidenciaViewSet, OrdenadorViewSet, TelefonoViewSet, Impreso
 
 router = DefaultRouter()
 router.register(r'incidencias', IncidenciaViewSet, basename='incidencias')
-router.register(r'equipos/ordenadores', OrdenadorViewSet, basename='ordenadores')
-router.register(r'equipos/telefonos', TelefonoViewSet, basename='telefonos')
-router.register(r'equipos/impresoras', ImpresoraViewSet, basename='impresoras')
-router.register(r'equipos/red', EquipoRedViewSet, basename='red')
+router.register(r'ordenadores', OrdenadorViewSet, basename='ordenadores')
+router.register(r'telefonos', TelefonoViewSet, basename='telefonos')
+router.register(r'impresoras', ImpresoraViewSet, basename='impresoras')
+router.register(r'red', EquipoRedViewSet, basename='red')
 
 urlpatterns = [
     path('token/', views.token_obtain_pair, name='token_obtain_pair'),
