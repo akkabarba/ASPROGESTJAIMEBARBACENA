@@ -1,58 +1,95 @@
 import React, { useState } from 'react';
-import API_BASE from '../utils/config';
 import { refreshTokenIfNeeded } from '../utils/auth';
+import API_BASE from '../utils/config';
+
+const CENTROS = [
+  'CENTRAL', 'CPM I', 'CPM II', 'RGA III', 'CPM IV', 'DISL V',
+  'CPM VII', 'CPM X', 'ISL XI', 'ISL XII', 'ISL XIII', 'CAL XIV', 'CPM XV'
+];
 
 function Ordenadores() {
   const [form, setForm] = useState({
-    tipo: "ordenador", centro: "", registro: "", empresa: "", tipo_equipo: "", marca: "", modelo: "", sn: "", compra: "",
-    garantia: "", sistema: "", nombre_equipo: "", cuenta_usuario: "", clave: "", descripcion_estado: "", comentarios: ""
+    centro: '',
+    marca: '',
+    modelo: '',
+    numero_serie: '',
+    procesador: '',
+    ram: '',
+    almacenamiento: ''
   });
 
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
+  const [guardando, setGuardando] = useState(false);
 
   const handleChange = e => {
-    setForm({...form, [e.target.name]: e.target.value});
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
     setMensaje('');
     setError('');
+    setGuardando(true);
+
     try {
       const token = await refreshTokenIfNeeded();
-      const res = await fetch(`${API_BASE}/equipos/ordenadores/`, {
+      const res = await fetch(`${API_BASE}/ordenadores/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(form)
       });
-      if (res.ok) setMensaje("Ordenador creado correctamente.");
-      else setError("Error al guardar.");
-    } catch { setError("Error de conexión."); }
+
+      if (res.ok) {
+        setMensaje('Ordenador registrado correctamente.');
+        setForm({ centro: '', marca: '', modelo: '', numero_serie: '', procesador: '', ram: '', almacenamiento: '' });
+      } else {
+        setError('Error al registrar ordenador');
+      }
+    } catch {
+      setError('Error de conexión');
+    } finally {
+      setGuardando(false);
+    }
   };
 
   return (
     <div className="container mt-4">
-      <h2>Registrar Ordenador</h2>
+      <h3>Registro de ordenadores</h3>
+
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-danger">{error}</div>}
+
       <form onSubmit={handleSubmit}>
-        <label>Centro:</label><input name="centro" value={form.centro} onChange={handleChange} className="form-control mb-2"/>
-        <label>Registro:</label><input name="registro" value={form.registro} onChange={handleChange} className="form-control mb-2"/>
-        <label>Empresa:</label><input name="empresa" value={form.empresa} onChange={handleChange} className="form-control mb-2"/>
-        <label>Tipo Equipo:</label><input name="tipo_equipo" value={form.tipo_equipo} onChange={handleChange} className="form-control mb-2"/>
-        <label>Marca:</label><input name="marca" value={form.marca} onChange={handleChange} className="form-control mb-2"/>
-        <label>Modelo:</label><input name="modelo" value={form.modelo} onChange={handleChange} className="form-control mb-2"/>
-        <label>SN:</label><input name="sn" value={form.sn} onChange={handleChange} className="form-control mb-2"/>
-        <label>Compra:</label><input name="compra" value={form.compra} onChange={handleChange} className="form-control mb-2"/>
-        <label>Garantía:</label><input name="garantia" value={form.garantia} onChange={handleChange} className="form-control mb-2"/>
-        <label>Sistema:</label><input name="sistema" value={form.sistema} onChange={handleChange} className="form-control mb-2"/>
-        <label>Nombre Equipo:</label><input name="nombre_equipo" value={form.nombre_equipo} onChange={handleChange} className="form-control mb-2"/>
-        <label>Cuenta Usuario:</label><input name="cuenta_usuario" value={form.cuenta_usuario} onChange={handleChange} className="form-control mb-2"/>
-        <label>Clave:</label><input name="clave" value={form.clave} onChange={handleChange} className="form-control mb-2"/>
-        <label>Descripción Estado:</label><input name="descripcion_estado" value={form.descripcion_estado} onChange={handleChange} className="form-control mb-2"/>
-        <label>Comentarios:</label><textarea name="comentarios" value={form.comentarios} onChange={handleChange} className="form-control mb-2"/>
-        <button className="btn btn-success" type="submit">Guardar</button>
+        <label>Centro</label>
+        <select name="centro" className="form-select mb-2" value={form.centro} onChange={handleChange} required>
+          <option value="">Selecciona centro...</option>
+          {CENTROS.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+
+        <label>Marca</label>
+        <input name="marca" className="form-control mb-2" value={form.marca} onChange={handleChange} required />
+
+        <label>Modelo</label>
+        <input name="modelo" className="form-control mb-2" value={form.modelo} onChange={handleChange} required />
+
+        <label>Número de serie</label>
+        <input name="numero_serie" className="form-control mb-2" value={form.numero_serie} onChange={handleChange} required />
+
+        <label>Procesador</label>
+        <input name="procesador" className="form-control mb-2" value={form.procesador} onChange={handleChange} required />
+
+        <label>Ram</label>
+        <input name="ram" className="form-control mb-2" value={form.ram} onChange={handleChange} required />
+
+        <label>Almacenamiento</label>
+        <input name="almacenamiento" className="form-control mb-2" value={form.almacenamiento} onChange={handleChange} required />
+
+        <button className="btn btn-success mt-2" type="submit" disabled={guardando}>
+          {guardando ? 'Guardando...' : 'Crear'}
+        </button>
+        <div className="mb-5"></div>
       </form>
     </div>
   );
