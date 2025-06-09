@@ -1,7 +1,7 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Incidencia, Equipo
+from .models import Incidencia, Ordenador, Impresora, EquipoRed, Telefono
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -40,7 +40,22 @@ class IncidenciaSerializer(serializers.ModelSerializer):
             validated_data.pop('observaciones', None)
         return super().update(instance, validated_data)
 
-class EquipoSerializer(serializers.ModelSerializer):
+class OrdenadorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Equipo
+        model = Ordenador
+        fields = '__all__'
+
+class TelefonoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Telefono
+        fields = '__all__'
+
+class ImpresoraSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Impresora
+        fields = '__all__'
+
+class EquipoRedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EquipoRed
         fields = '__all__'

@@ -92,38 +92,31 @@ class Incidencia(models.Model):
     def __str__(self):
         return f"{self.get_relativa_display()} ({self.creada_por.username})"
 
-class Equipo(models.Model):
-    TIPOS = [
-        ('ordenador', 'Ordenador'),
-        ('telefono', 'Teléfono'),
-        ('impresora', 'Impresora'),
-        ('equipo_red', 'Equipo de Red'),
-    ]
+# models.py
 
-    tipo = models.CharField(max_length=20, choices=TIPOS)
-
-    # Campos comunes
+class Ordenador(models.Model):
     centro = models.CharField(max_length=100)
+    empresa = models.CharField(max_length=100, blank=True)
+    tipo_equipo = models.CharField(max_length=100, blank=True)
     marca = models.CharField(max_length=100, blank=True)
     modelo = models.CharField(max_length=100, blank=True)
     numero_serie = models.CharField(max_length=100, blank=True)
-    comentarios = models.TextField(blank=True)
-    fecha_registro = models.DateTimeField(auto_now_add=True)
-
-    # ORDENADORES
-    empresa = models.CharField(max_length=100, blank=True)
-    tipo_equipo = models.CharField(max_length=100, blank=True)
-    sistema_operativo = models.CharField(max_length=100, blank=True)
-    cuenta_usuario = models.TextField(blank=True)
-    clave = models.TextField(blank=True)
     fecha_compra = models.DateField(null=True, blank=True)
     garantia = models.DateField(null=True, blank=True)
+    sistema_operativo = models.CharField(max_length=100, blank=True)
+    nombre_equipo = models.CharField(max_length=100, blank=True)
+    cuenta_usuario = models.TextField(blank=True)
+    clave = models.TextField(blank=True)
     descripcion_estado = models.TextField(blank=True)
     observaciones = models.TextField(blank=True)
 
-    # TELEFONOS
+class Telefono(models.Model):
+    centro = models.CharField(max_length=100)
     linea = models.CharField(max_length=100, blank=True)
     puesto = models.CharField(max_length=100, blank=True)
+    marca = models.CharField(max_length=100, blank=True)
+    modelo = models.CharField(max_length=100, blank=True)
+    numero_serie = models.CharField(max_length=100, blank=True)
     imei = models.CharField(max_length=100, blank=True)
     desbloqueo = models.CharField(max_length=100, blank=True)
     datos_sim = models.CharField(max_length=100, blank=True)
@@ -135,12 +128,17 @@ class Equipo(models.Model):
     tarifa = models.CharField(max_length=100, blank=True)
     restriccion = models.CharField(max_length=100, blank=True)
 
-    # IMPRESORAS
+class Impresora(models.Model):
+    centro = models.CharField(max_length=100)
     direccion = models.CharField(max_length=255, blank=True)
     telefono_direccion = models.CharField(max_length=100, blank=True)
+    modelo = models.CharField(max_length=100, blank=True)
+    numero_serie = models.CharField(max_length=100, blank=True)
     ipv4 = models.CharField(max_length=100, blank=True)
+    comentarios = models.TextField(blank=True)
 
-    # EQUIPOS DE RED
+class EquipoRed(models.Model):
+    centro = models.CharField(max_length=100)
     proveedor = models.CharField(max_length=100, blank=True)
     nombre_equipo = models.CharField(max_length=100, blank=True)
     detalles_conexion = models.TextField(blank=True)
@@ -153,6 +151,5 @@ class Equipo(models.Model):
     terminal_imei = models.CharField(max_length=100, blank=True)
     terminal_num_serie = models.CharField(max_length=100, blank=True)
     wifi_clave = models.CharField(max_length=100, blank=True)
+    comentarios = models.TextField(blank=True)
 
-    def __str__(self):
-        return f"{self.get_tipo_display()} - {self.centro} ({self.marca} {self.modelo})"

@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import viewsets, filters
 from django.contrib.auth.models import User
-from .models import Incidencia, Equipo
-from .serializers import IncidenciaSerializer, CustomTokenObtainPairSerializer, EquipoSerializer
+from .models import Incidencia, Ordenador, Impresora, EquipoRed, Telefono
+from .serializers import IncidenciaSerializer, CustomTokenObtainPairSerializer, OrdenadorSerializer, ImpresoraSerializer, EquipoRedSerializer, TelefonoSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.pagination import PageNumberPagination
 
@@ -147,29 +147,30 @@ token_refresh = TokenRefreshView.as_view()
 # API REST EQUIPOS
 # ==========================
 
-class EquipoPagination(PageNumberPagination):
-    page_size = 5
-
 class OrdenadorViewSet(viewsets.ModelViewSet):
-    queryset = Equipo.objects.filter(tipo='ordenador')
-    serializer_class = EquipoSerializer
+    queryset = Ordenador.objects.all()
+    serializer_class = OrdenadorSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = EquipoPagination
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 5
 
 class TelefonoViewSet(viewsets.ModelViewSet):
-    queryset = Equipo.objects.filter(tipo='telefono')
-    serializer_class = EquipoSerializer
+    queryset = Telefono.objects.all()
+    serializer_class = TelefonoSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = EquipoPagination
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 5
 
 class ImpresoraViewSet(viewsets.ModelViewSet):
-    queryset = Equipo.objects.filter(tipo='impresora')
-    serializer_class = EquipoSerializer
+    queryset = Impresora.objects.all()
+    serializer_class = ImpresoraSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = EquipoPagination
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 5
 
-class RedViewSet(viewsets.ModelViewSet):
-    queryset = Equipo.objects.filter(tipo='red')
-    serializer_class = EquipoSerializer
+class EquipoRedViewSet(viewsets.ModelViewSet):
+    queryset = EquipoRed.objects.all()
+    serializer_class = EquipoRedSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = EquipoPagination
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 5
