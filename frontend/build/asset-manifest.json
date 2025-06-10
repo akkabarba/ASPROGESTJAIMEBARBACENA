@@ -1,15 +1,16 @@
 {
   "files": {
-    "main.css": "./static/css/main.1fa0d0a6.css",
-    "main.js": "./static/js/main.b3df85f5.js",
+    "main.css": "./static/css/main.93750ce5.css",
+    "main.js": "./static/js/main.545074ac.js",
     "static/js/453.8ab44547.chunk.js": "./static/js/453.8ab44547.chunk.js",
+    "static/media/LOGO-ASPROINFA_COLOR_Fondo-Tansparente.png": "./static/media/LOGO-ASPROINFA_COLOR_Fondo-Tansparente.bb16b64a11486fc8e796.png",
     "index.html": "./index.html",
-    "main.1fa0d0a6.css.map": "./static/css/main.1fa0d0a6.css.map",
-    "main.b3df85f5.js.map": "./static/js/main.b3df85f5.js.map",
+    "main.93750ce5.css.map": "./static/css/main.93750ce5.css.map",
+    "main.545074ac.js.map": "./static/js/main.545074ac.js.map",
     "453.8ab44547.chunk.js.map": "./static/js/453.8ab44547.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.1fa0d0a6.css",
-    "static/js/main.b3df85f5.js"
+    "static/css/main.93750ce5.css",
+    "static/js/main.545074ac.js"
   ]
 }
