@@ -9,7 +9,7 @@ function Navbar({ usuario, setVista, onLogout }) {
 
   const handleSelectVista = (vista) => {
     setVista(vista);
-    setShowEquipos(false);  // Cierra el dropdown al seleccionar
+    setShowEquipos(false);
   };
 
   return (
@@ -46,7 +46,7 @@ function Navbar({ usuario, setVista, onLogout }) {
                     Equipos ▼
                   </button>
                   
-                  {/* Submenú animado */}
+                  {}
                   <div className={`dropdown-menu show ${showEquipos ? 'dropdown-fade-in' : 'dropdown-fade-out'}`} 
                        style={{ position: 'absolute', top: '100%', transition: 'opacity 0.3s ease' }}>
                     <button className="dropdown-item" onClick={() => handleSelectVista('ordenadores')}>Ordenadores</button>
