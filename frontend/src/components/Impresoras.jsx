@@ -28,6 +28,12 @@ function Impresoras() {
   const [form, setForm] = useState(initialForm);
   const [guardando, setGuardando] = useState(false);
   const [eliminando, setEliminando] = useState(false);
+  const [modalEliminar, setModalEliminar] = useState({
+    abierto: false,
+    id: null,
+    numero_serie: '',
+    confirmSerie: ''
+  });
 
   const cargarDatos = async () => {
     try {
@@ -84,6 +90,7 @@ function Impresoras() {
     setForm({ ...seleccionado });
     setEditMode(true);
     setMensaje(''); setError('');
+    setModalEliminar({ abierto: false, id: null, numero_serie: '', confirmSerie: '' });
   };
 
   const handleActualizar = async () => {
@@ -102,12 +109,12 @@ function Impresoras() {
         const updated = await res.json();
         setSeleccionado(updated);
         setMensaje('✅ Impresora actualizada');
-        cargarDatos();
         setEditMode(false);
+        cargarDatos();
         setTimeout(() => setMensaje(''), 3000);
       } else {
         const data = await res.json();
-        setError(data.detail || 'Error actualizando');
+        setError(data.detail || 'Error actualizando impresora');
       }
     } catch {
       setError('Error de conexión');
@@ -116,12 +123,20 @@ function Impresoras() {
     }
   };
 
+  const abrirModalEliminar = () => {
+    setModalEliminar({
+      abierto: true,
+      id: seleccionado.id,
+      numero_serie: seleccionado.numero_serie,
+      confirmSerie: ''
+    });
+  };
+
   const handleEliminar = async () => {
-    if (!window.confirm('¿Eliminar esta impresora?')) return;
     setEliminando(true);
     try {
       const token = await refreshTokenIfNeeded();
-      const res = await fetch(`${API_BASE}/impresoras/${seleccionado.id}/`, {
+      const res = await fetch(`${API_BASE}/impresoras/${modalEliminar.id}/`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -131,20 +146,21 @@ function Impresoras() {
         cargarDatos();
         setTimeout(() => setMensaje(''), 3000);
       } else {
-        setError('Error eliminando');
+        setError('Error eliminando impresora');
       }
     } catch {
       setError('Error de conexión');
     } finally {
       setEliminando(false);
+      setModalEliminar({ abierto: false, id: null, numero_serie: '', confirmSerie: '' });
     }
   };
 
   return (
     <div className="container mt-4">
       <h3>Registro de impresoras</h3>
-      { mensaje && <div className="alert alert-success">{mensaje}</div> }
-      { error   && <div className="alert alert-danger">{error}</div> }
+      {mensaje && <div className="alert alert-success">{mensaje}</div>}
+      {error   && <div className="alert alert-danger">{error}</div>}
 
       {!seleccionado ? (
         <>
@@ -176,7 +192,7 @@ function Impresoras() {
                 <input name="modelo" className="form-control" value={form.modelo} onChange={handleChange} />
               </div>
               <div className="col-md-4">
-                <label>Nº de serie:</label>
+                <label>Nº serie:</label>
                 <input name="numero_serie" className="form-control" value={form.numero_serie} onChange={handleChange} />
               </div>
               <div className="col-md-4">
@@ -216,21 +232,17 @@ function Impresoras() {
           <div className="card shadow p-4 mb-3">
             <h4>Detalles de la impresora</h4>
             {Object.entries(seleccionado).map(([key, val]) => (
-              <p key={key}><b>{key.replaceAll('_',' ')}</b>: {val?.toString() || '—'}</p>
+              <p key={key}><b>{key.replaceAll('_',' ')}</b>: {val?.toString()||'—'}</p>
             ))}
             <div className="d-flex justify-content-center gap-3 mt-3">
               <button className="btn btn-primary" onClick={enterEditMode}>Modificar</button>
-              <button className="btn btn-danger" disabled={eliminando} onClick={handleEliminar}>
-                {eliminando
-                  ? <span className="spinner-border spinner-border-sm" role="status" />
-                  : 'Eliminar'}
-              </button>
+              <button className="btn btn-danger" onClick={abrirModalEliminar}>Eliminar</button>
               <button className="btn btn-secondary" onClick={() => setSeleccionado(null)}>Volver</button>
             </div>
           </div>
 
           {editMode && (
-            <div className="card shadow p-4">
+            <div className="card shadow p-4 mb-3">
               <h4>Editar impresora</h4>
               <form onSubmit={e => { e.preventDefault(); handleActualizar(); }} className="mb-3">
                 <div className="row g-2">
@@ -260,7 +272,7 @@ function Impresoras() {
                     <input name="modelo" className="form-control" value={form.modelo} onChange={handleChange} />
                   </div>
                   <div className="col-md-4">
-                    <label>Nº Serie:</label>
+                    <label>Nº serie:</label>
                     <input name="numero_serie" className="form-control" value={form.numero_serie} onChange={handleChange} />
                   </div>
                   <div className="col-md-4">
@@ -279,14 +291,49 @@ function Impresoras() {
                       ? <span className="spinner-border spinner-border-sm" role="status" />
                       : 'Guardar cambios'}
                   </button>
-                  <button className="btn btn-secondary" onClick={() => setEditMode(false)}>
-                    Cancelar
-                  </button>
+                  <button className="btn btn-secondary" onClick={() => setEditMode(false)}>Cancelar</button>
                 </div>
               </form>
             </div>
           )}
         </>
+      )}
+
+      {modalEliminar.abierto && (
+        <div className="modal d-block bg-dark bg-opacity-50">
+          <div className="modal-dialog">
+            <div className="modal-content p-4">
+              <h5 className="text-danger">Eliminar impresora SN: {modalEliminar.numero_serie}</h5>
+              <p>Escribe el Nº de serie exacto para confirmar:</p>
+              <input
+                className="form-control mb-3"
+                placeholder="Nº de serie"
+                value={modalEliminar.confirmSerie}
+                onChange={e => setModalEliminar(me => ({
+                  ...me,
+                  confirmSerie: e.target.value
+                }))}
+              />
+              <div className="text-end">
+                <button
+                  className="btn btn-secondary me-2"
+                  onClick={() => setModalEliminar({ abierto: false, id: null, numero_serie: '', confirmSerie: '' })}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="btn btn-danger"
+                  disabled={modalEliminar.confirmSerie !== modalEliminar.numero_serie}
+                  onClick={handleEliminar}
+                >
+                  {eliminando
+                    ? <span className="spinner-border spinner-border-sm" role="status" />
+                    : 'Eliminar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
