@@ -4,30 +4,33 @@ import API_BASE from '../utils/config';
 
 function ListadoIncidencias({ usuario }) {
   const estados = [
-    { clave: 'nueva', titulo: 'Nuevas' },
+    { clave: 'nueva',    titulo: 'Nuevas' },
     { clave: 'en_curso', titulo: 'En curso' },
-    { clave: 'cerrada', titulo: 'Cerradas' },
+    { clave: 'cerrada',  titulo: 'Cerradas' },
   ];
+
+  const pageSize = 5;
 
   const [dataByEstado, setDataByEstado] = useState({
     nueva:    { items: [], page: 1, totalPages: 1, loading: false, error: '' },
-    en_curso:{ items: [], page: 1, totalPages: 1, loading: false, error: '' },
+    en_curso: { items: [], page: 1, totalPages: 1, loading: false, error: '' },
     cerrada:  { items: [], page: 1, totalPages: 1, loading: false, error: '' },
   });
 
-  const pageSize = 5; 
-
-  const fetchEstado = async (clave) => {
+  const fetchEstado = async (clave, page) => {
     setDataByEstado(d => ({
       ...d,
       [clave]: { ...d[clave], loading: true, error: '' }
     }));
     try {
       const token = await refreshTokenIfNeeded();
-      const res = await fetch(
-        `${API_BASE}/incidencias/?estado=${clave}&page=${dataByEstado[clave].page}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const url = new URL(`${API_BASE}/incidencias/`);
+      url.searchParams.set('estado', clave);
+      url.searchParams.set('page', page);
+      url.searchParams.set('page_size', pageSize);
+      const res = await fetch(url.toString(), {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       if (!res.ok) throw new Error('Error cargando');
       const json = await res.json();
       const items = json.results ?? [];
@@ -55,13 +58,16 @@ function ListadoIncidencias({ usuario }) {
   };
 
   useEffect(() => {
-    estados.forEach(({ clave }) => fetchEstado(clave));
-    
-  }, [
-    dataByEstado.nueva.page,
-    dataByEstado.en_curso.page,
-    dataByEstado.cerrada.page
-  ]);
+    fetchEstado('nueva', dataByEstado.nueva.page);
+  }, [dataByEstado.nueva.page]);
+
+  useEffect(() => {
+    fetchEstado('en_curso', dataByEstado.en_curso.page);
+  }, [dataByEstado.en_curso.page]);
+
+  useEffect(() => {
+    fetchEstado('cerrada', dataByEstado.cerrada.page);
+  }, [dataByEstado.cerrada.page]);
 
   const renderCamposTipo = (inc) => {
     switch (inc.relativa) {
@@ -143,7 +149,9 @@ function ListadoIncidencias({ usuario }) {
               <p>Cargando…</p>
             ) : vacio ? (
               <>
-                <p className="text-muted">No hay incidencias {titulo.toLowerCase()}.</p>
+                <p className="text-muted">
+                  No hay incidencias {titulo.toLowerCase()}.
+                </p>
                 <p>Página 0 de 0</p>
               </>
             ) : (

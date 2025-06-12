@@ -5,8 +5,8 @@ import API_BASE from '../utils/config';
 
 const CENTROS = [
   'CENTRAL','CPM I','CPM II','RGA III','CPM IV',
-  'DISL V','CPM VII','CPM X','ISL XI','ISL XII',
-  'ISL XIII','CAL XIV','CPM XV'
+  'OISL V','CPM VII','CPM X','ISL XI','ISL XII',
+  'ISL XIII','CAI XIV','CPM XV'
 ];
 
 function Administracion() {
@@ -67,11 +67,7 @@ function Administracion() {
   };
 
   useEffect(() => { cargarUsuarios(); }, [paginaUsuarios]);
-  useEffect(() => { cargarIncidencias(); }, [
-    paginaIncidencias,
-    filterType,
-    filterValue
-  ]);
+  useEffect(() => { cargarIncidencias(); }, [paginaIncidencias]);
 
   const handleCrearUsuario = async (e) => {
     e.preventDefault();
@@ -138,17 +134,8 @@ function Administracion() {
     }
   };
 
-  const estadoTexto = (v) => {
-    if (v === 'nueva') return 'Nueva';
-    if (v === 'en_curso') return 'En curso';
-    return 'Cerrada';
-  };
-
-  const estadoClase = (v) => {
-    if (v === 'nueva') return 'bg-danger text-white';
-    if (v === 'en_curso') return 'bg-warning text-dark';
-    return 'bg-success text-white';
-  };
+  const estadoTexto = v => v === 'nueva' ? 'Nueva' : v === 'en_curso' ? 'En curso' : 'Cerrada';
+  const estadoClase = v => v === 'nueva' ? 'bg-danger text-white' : v === 'en_curso' ? 'bg-warning text-dark' : 'bg-success text-white';
 
   const resetFiltros = () => {
     setFilterType('');
@@ -171,22 +158,35 @@ function Administracion() {
         <form onSubmit={handleCrearUsuario}>
           <div className="row">
             <div className="col-md-4 mb-2">
-              <input className="form-control" name="username" placeholder="Usuario"
+              <input
+                className="form-control"
+                name="username"
+                placeholder="Usuario"
                 value={nuevo.username}
                 onChange={e => setNuevo({...nuevo, username: e.target.value})}
-                required />
+                required
+              />
             </div>
             <div className="col-md-4 mb-2">
-              <input className="form-control" name="email" placeholder="Correo"
+              <input
+                className="form-control"
+                name="email"
+                placeholder="Correo"
                 value={nuevo.email}
                 onChange={e => setNuevo({...nuevo, email: e.target.value})}
-                required />
+                required
+              />
             </div>
             <div className="col-md-4 mb-2">
-              <input className="form-control" name="password" type="password" placeholder="Contraseña"
+              <input
+                className="form-control"
+                name="password"
+                type="password"
+                placeholder="Contraseña"
                 value={nuevo.password}
                 onChange={e => setNuevo({...nuevo, password: e.target.value})}
-                required />
+                required
+              />
             </div>
           </div>
           <button className="btn btn-success mt-2" type="submit">Crear usuario</button>
@@ -196,9 +196,11 @@ function Administracion() {
       <div className="mt-5">
         <h4>Usuarios registrados</h4>
         <table className="table table-bordered table-striped mt-3">
-          <thead><tr>
-            <th>Usuario</th><th>Correo</th><th>Admin</th><th>Acciones</th>
-          </tr></thead>
+          <thead>
+            <tr>
+              <th>Usuario</th><th>Correo</th><th>Admin</th><th>Acciones</th>
+            </tr>
+          </thead>
           <tbody>
             {usuarios.map(u => (
               <tr key={u.id}>
@@ -206,14 +208,14 @@ function Administracion() {
                 <td>{u.email}</td>
                 <td>{u.is_superuser ? '✔️' : '❌'}</td>
                 <td>
-                  <button className="btn btn-outline-primary btn-sm me-2"
-                    onClick={() => setModal({ abierto: true, id: u.id, username: u.username, newPassword: '' })}>
-                    Cambiar contraseña
-                  </button>
-                  <button className="btn btn-outline-danger btn-sm"
-                    onClick={() => setModalEliminar({ abierto: true, id: u.id, email: u.email, confirmEmail: '' })}>
-                    Eliminar
-                  </button>
+                  <button
+                    className="btn btn-outline-primary btn-sm me-2"
+                    onClick={() => setModal({ abierto: true, id: u.id, username: u.username, newPassword: '' })}
+                  >Cambiar contraseña</button>
+                  <button
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={() => setModalEliminar({ abierto: true, id: u.id, email: u.email, confirmEmail: '' })}
+                  >Eliminar</button>
                 </td>
               </tr>
             ))}
@@ -221,13 +223,17 @@ function Administracion() {
         </table>
 
         <div className="text-center my-3">
-          <button className="btn btn-outline-secondary mx-1"
+          <button
+            className="btn btn-outline-secondary mx-1"
             disabled={paginaUsuarios <= 1}
-            onClick={() => setPaginaUsuarios(paginaUsuarios - 1)}>◀</button>
+            onClick={() => setPaginaUsuarios(paginaUsuarios - 1)}
+          >◀</button>
           Página {paginaUsuarios} de {totalPaginasUsuarios}
-          <button className="btn btn-outline-secondary mx-1"
+          <button
+            className="btn btn-outline-secondary mx-1"
             disabled={paginaUsuarios >= totalPaginasUsuarios}
-            onClick={() => setPaginaUsuarios(paginaUsuarios + 1)}>▶</button>
+            onClick={() => setPaginaUsuarios(paginaUsuarios + 1)}
+          >▶</button>
         </div>
       </div>
 
@@ -244,9 +250,11 @@ function Administracion() {
             <div className="row g-2 mb-3 align-items-end">
               <div className="col-md-3">
                 <label>Filtrar por:</label>
-                <select className="form-select"
+                <select
+                  className="form-select"
                   value={filterType}
-                  onChange={e => { setFilterType(e.target.value); setFilterValue(''); setPaginaIncidencias(1); }}>
+                  onChange={e => { setFilterType(e.target.value); setFilterValue(''); setPaginaIncidencias(1); }}
+                >
                   <option value="">—</option>
                   <option value="centro">Centro</option>
                   <option value="estado">Estado</option>
@@ -255,10 +263,12 @@ function Administracion() {
               </div>
               <div className="col-md-3">
                 <label>Valor:</label>
-                <select className="form-select"
+                <select
+                  className="form-select"
                   value={filterValue}
                   onChange={e => { setFilterValue(e.target.value); setPaginaIncidencias(1); }}
-                  disabled={!filterType}>
+                  disabled={!filterType}
+                >
                   <option value="">—</option>
                   {filterType === 'centro' && CENTROS.map(c => (
                     <option key={c} value={c}>{c}</option>
@@ -279,6 +289,14 @@ function Administracion() {
                 </select>
               </div>
               <div className="col-md-3 text-end">
+                <button
+                  className="btn btn-primary w-100"
+                  onClick={() => { setPaginaIncidencias(1); cargarIncidencias(); }}
+                >
+                  Aplicar filtros
+                </button>
+              </div>
+              <div className="col-md-3 text-end">
                 <button className="btn btn-outline-secondary w-100" onClick={resetFiltros}>
                   Reset filtros
                 </button>
@@ -289,7 +307,8 @@ function Administracion() {
               <div key={inc.id}
                 className={`card my-2 shadow-sm ${estadoClase(inc.estado)}`}
                 style={{ cursor: 'pointer' }}
-                onClick={() => setIncidenciaSeleccionada(inc)}>
+                onClick={() => setIncidenciaSeleccionada(inc)}
+              >
                 <div className="card-body">
                   <h5>{inc.descripcion}</h5>
                   <p>
@@ -299,14 +318,19 @@ function Administracion() {
                 </div>
               </div>
             ))}
+
             <div className="text-center my-3">
-              <button className="btn btn-outline-secondary mx-1"
+              <button
+                className="btn btn-outline-secondary mx-1"
                 disabled={paginaIncidencias <= 1}
-                onClick={() => setPaginaIncidencias(paginaIncidencias - 1)}>◀</button>
+                onClick={() => setPaginaIncidencias(paginaIncidencias - 1)}
+              >◀</button>
               Página {paginaIncidencias} de {totalPaginasIncidencias}
-              <button className="btn btn-outline-secondary mx-1"
+              <button
+                className="btn btn-outline-secondary mx-1"
                 disabled={paginaIncidencias >= totalPaginasIncidencias}
-                onClick={() => setPaginaIncidencias(paginaIncidencias + 1)}>▶</button>
+                onClick={() => setPaginaIncidencias(paginaIncidencias + 1)}
+              >▶</button>
             </div>
           </>
         )}
@@ -317,10 +341,13 @@ function Administracion() {
           <div className="modal-dialog">
             <div className="modal-content p-3">
               <h5>Cambiar contraseña de {modal.username}</h5>
-              <input type="password" className="form-control mt-3"
+              <input
+                type="password"
+                className="form-control mt-3"
                 placeholder="Nueva contraseña"
                 value={modal.newPassword}
-                onChange={e => setModal({...modal, newPassword: e.target.value})} />
+                onChange={e => setModal({...modal, newPassword: e.target.value})}
+              />
               <div className="mt-3 text-end">
                 <button className="btn btn-secondary me-2"
                   onClick={() => setModal({ abierto: false })}>Cancelar</button>
@@ -338,11 +365,14 @@ function Administracion() {
             <div className="modal-content p-3">
               <h5>Eliminar usuario: {modalEliminar.email}</h5>
               <p className="text-danger mb-2">
-                Escribe el correo completo para confirmar:
+                Escribe el correo completo para confirmarlo:
               </p>
-              <input type="email" className="form-control"
+              <input
+                type="email"
+                className="form-control"
                 value={modalEliminar.confirmEmail}
-                onChange={e => setModalEliminar({...modalEliminar, confirmEmail: e.target.value})} />
+                onChange={e => setModalEliminar({...modalEliminar, confirmEmail: e.target.value})}
+              />
               <div className="mt-3 text-end">
                 <button className="btn btn-secondary me-2"
                   onClick={() => setModalEliminar({ abierto: false, id: null, email: '', confirmEmail: '' })}>
