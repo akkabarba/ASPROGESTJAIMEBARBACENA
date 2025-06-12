@@ -15,11 +15,9 @@ function ListadoIncidencias({ usuario }) {
   const [loadingAll, setLoadingAll] = useState(false);
   const [errorAll, setErrorAll] = useState('');
 
-  const [dataByEstado, setDataByEstado] = useState({
-    nueva:    { page: 1 },
-    en_curso: { page: 1 },
-    cerrada:  { page: 1 },
-  });
+  const [pageNueva,   setPageNueva]   = useState(1);
+  const [pageEnCurso, setPageEnCurso] = useState(1);
+  const [pageCerrada, setPageCerrada] = useState(1);
 
   useEffect(() => {
     const loadAll = async () => {
@@ -40,13 +38,6 @@ function ListadoIncidencias({ usuario }) {
     };
     loadAll();
   }, []);
-
-  const handlePageChange = (clave, newPage) => {
-    setDataByEstado(d => ({
-      ...d,
-      [clave]: { page: newPage }
-    }));
-  };
 
   const renderCamposTipo = inc => {
     switch (inc.relativa) {
@@ -102,12 +93,25 @@ function ListadoIncidencias({ usuario }) {
       <h2>Listado de Incidencias</h2>
 
       {estados.map(({ clave, titulo }) => {
-        const list       = all.filter(i => i.estado === clave);
-        const total      = list.length;
+        const list = all.filter(i => i.estado === clave);
+        const total = list.length;
         const totalPages = total > 0 ? Math.ceil(total / pageSize) : 1;
-        const page       = dataByEstado[clave].page;
-        const vacio      = total === 0;
-        const items      = list.slice((page - 1) * pageSize, page * pageSize);
+
+        let page, setPage;
+        if (clave === 'nueva') {
+          page    = pageNueva;
+          setPage = setPageNueva;
+        } else if (clave === 'en_curso') {
+          page    = pageEnCurso;
+          setPage = setPageEnCurso;
+        } else {
+          page    = pageCerrada;
+          setPage = setPageCerrada;
+        }
+
+        const start = (page - 1) * pageSize;
+        const items = list.slice(start, start + pageSize);
+        const vacio = total === 0;
 
         return (
           <div key={clave} className="mt-4">
@@ -145,16 +149,20 @@ function ListadoIncidencias({ usuario }) {
                   <button
                     className="btn btn-secondary"
                     disabled={page <= 1}
-                    onClick={() => handlePageChange(clave, page - 1)}
-                  >Anterior</button>
+                    onClick={() => setPage(page - 1)}
+                  >
+                    Anterior
+                  </button>
 
                   <span>Página {page} de {totalPages}</span>
 
                   <button
                     className="btn btn-secondary"
                     disabled={page >= totalPages}
-                    onClick={() => handlePageChange(clave, page + 1)}
-                  >Siguiente</button>
+                    onClick={() => setPage(page + 1)}
+                  >
+                    Siguiente
+                  </button>
                 </div>
               </>
             )}
