@@ -172,13 +172,13 @@
                     <option value="CPM II">CPM II</option>
                     <option value="RGA III">RGA III</option>
                     <option value="CPM IV">CPM IV</option>
-                    <option value="DISL V">DISL V</option>
+                    <option value="DISL V">OISL V</option>
                     <option value="CPM VII">CPM VII</option>
                     <option value="CPM X">CPM X</option>
                     <option value="ISL XI">ISL XI</option>
                     <option value="ISL XII">ISL XII</option>
                     <option value="ISL XIII">ISL XIII</option>
-                    <option value="CAL XIV">CAL XIV</option>
+                    <option value="CAL XIV">CAI XIV</option>
                     <option value="CPM XV">CPM XV</option>
                   </select>
                 </div>
