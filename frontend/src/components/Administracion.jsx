@@ -9,26 +9,29 @@ const CENTROS = [
   'ISL XIII','CAI XIV','CPM XV'
 ];
 
+const pageSize = 5;
+
 function Administracion() {
   const [usuarios, setUsuarios] = useState([]);
-  const [incidencias, setIncidencias] = useState([]);
   const [nuevo, setNuevo] = useState({ username: '', email: '', password: '' });
-  const [mensaje, setMensaje] = useState('');
-  const [error, setError] = useState('');
-  const [nuevas, setNuevas] = useState(0);
-
   const [paginaUsuarios, setPaginaUsuarios] = useState(1);
   const [totalPaginasUsuarios, setTotalPaginasUsuarios] = useState(1);
 
-  const [paginaIncidencias, setPaginaIncidencias] = useState(1);
-  const [totalPaginasIncidencias, setTotalPaginasIncidencias] = useState(1);
+  const [allIncidencias, setAllIncidencias] = useState([]);
+  const [loadingInc, setLoadingInc] = useState(false);
+  const [errorInc, setErrorInc] = useState('');
+  const [nuevasCount, setNuevasCount] = useState(0);
 
-  const [filterType, setFilterType] = useState('');
-  const [filterValue, setFilterValue] = useState('');
+  const [groupBy, setGroupBy] = useState('estado'); 
+  const [pagesByGroup, setPagesByGroup] = useState({});
+
+  const [incidenciaSeleccionada, setIncidenciaSeleccionada] = useState(null);
 
   const [modal, setModal] = useState({ abierto: false, id: null, username: '', newPassword: '' });
   const [modalEliminar, setModalEliminar] = useState({ abierto: false, id: null, email: '', confirmEmail: '' });
-  const [incidenciaSeleccionada, setIncidenciaSeleccionada] = useState(null);
+
+  const [mensaje, setMensaje] = useState('');
+  const [error, setError] = useState('');
 
   const cargarUsuarios = async () => {
     try {
@@ -44,59 +47,107 @@ function Administracion() {
     }
   };
 
-  const cargarIncidencias = async () => {
+  const cargarAllIncidencias = async () => {
+    setLoadingInc(true);
     try {
       const token = await refreshTokenIfNeeded();
-      const params = new URLSearchParams();
-      params.set('page', paginaIncidencias.toString());
-      params.set('page_size', '5');
-
-      if (filterType === 'centro' && filterValue) {
-        params.set('centro', filterValue);
-      }
-      if (filterType === 'estado' && filterValue) {
-        params.set('estado', filterValue);
-      }
-      if (filterType === 'antiguedad' && filterValue) {
-        params.set(
-          'ordering',
-          filterValue === 'mas_reciente' ? '-fecha_creacion' : 'fecha_creacion'
-        );
-      }
-
-      const url = `${API_BASE}/incidencias/?${params.toString()}`;
-      const res = await fetch(url, {
+      const res = await fetch(`${API_BASE}/incidencias/?page_size=1000`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const data = await res.json();
-      setIncidencias(data.results);
-      setTotalPaginasIncidencias(Math.ceil(data.count / 5));
-      setNuevas((data.results || []).filter(i => i.estado === 'nueva').length);
+      const json = await res.json();
+      const list = json.results ?? [];
+      setAllIncidencias(list);
+      setNuevasCount(list.filter(i => i.estado === 'nueva').length);
     } catch {
-      setError("Error al cargar incidencias");
+      setErrorInc("Error al cargar incidencias");
+    } finally {
+      setLoadingInc(false);
     }
   };
 
   useEffect(() => { cargarUsuarios(); }, [paginaUsuarios]);
-  useEffect(() => { cargarIncidencias(); }, [
-    paginaIncidencias,
-    filterType,
-    filterValue
-  ]);
+  useEffect(() => { cargarAllIncidencias(); }, []);
 
-  const handleCrearUsuario = async (e) => {
+  let grupos = [];
+  if (groupBy === 'estado') {
+    grupos = [
+      { key: 'nueva',    title: 'Nuevas'   },
+      { key: 'en_curso', title: 'En curso' },
+      { key: 'cerrada',  title: 'Cerradas'  },
+    ];
+  } else {
+    grupos = CENTROS
+      .map(c => ({ key: c, title: c }))
+      .filter(g => allIncidencias.some(i => i.centro === g.key));
+  }
+
+  useEffect(() => {
+    const obj = {};
+    grupos.forEach(g => obj[g.key] = 1);
+    setPagesByGroup(obj);
+  }, [allIncidencias, groupBy]);
+
+  const estadoTexto = v => v === 'nueva' ? 'Nueva'
+                    : v === 'en_curso'  ? 'En curso'
+                    : 'Cerrada';
+  const estadoClase = v => v === 'nueva' ? 'bg-danger text-white'
+                      : v === 'en_curso'? 'bg-warning text-dark'
+                      : 'bg-success text-white';
+  const renderCamposTipo = inc => {
+    switch(inc.relativa) {
+      case '1': return <>
+        <strong>IMEI:</strong> {inc.imei}<br/>
+        <strong>Tipo teléfono:</strong> {inc.tipo_incidencia_telefono}
+      </>;
+      case '2': return <>
+        <strong>Nº Serie:</strong> {inc.numero_serie}<br/>
+        <strong>Sesión:</strong> {inc.sesion}<br/>
+        <strong>Tipo ordenador:</strong> {inc.tipo_incidencia_ordenador}
+      </>;
+      case '3': return <>
+        <strong>Internet:</strong> {inc.tipo_incidencia_internet}<br/>
+        <strong>Inicio:</strong> {new Date(inc.fecha_inicio_incidencia).toLocaleString()}
+      </>;
+      case '4': return <>
+        <strong>Cuenta GSuite:</strong> {inc.cuenta_gsuite}<br/>
+        <strong>Tipo GSuite:</strong> {inc.tipo_incidencia_gsuite}
+      </>;
+      case '5': return <>
+        <strong>Tipo impresora:</strong> {inc.tipo_incidencia_impresora}
+      </>;
+      case '6': return <>
+        <strong>Trabajador plataforma:</strong> {inc.trabajador_plataforma}<br/>
+        <strong>Tipo plataforma:</strong> {inc.tipo_incidencia_plataforma}
+      </>;
+      case '7': return <>
+        <strong>Trabajador dispositivo:</strong> {inc.trabajador_dispositivo}<br/>
+        <strong>Modelo personal:</strong> {inc.modelo_personal}
+      </>;
+      case '8': return <>
+        <strong>Centro ANIDE:</strong> {inc.centro_anide}<br/>
+        <strong>Puesto trabajo:</strong> {inc.puesto_trabajo}
+      </>;
+      default: return null;
+    }
+  };
+
+
+  const handleCrearUsuario = async e => {
     e.preventDefault();
     setMensaje(''); setError('');
     try {
       const token = await refreshTokenIfNeeded();
       const res = await fetch(`${API_BASE}/crear_usuario/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: {
+          'Content-Type':'application/json',
+          Authorization:`Bearer ${token}`
+        },
         body: JSON.stringify(nuevo)
       });
       if (res.ok) {
         setMensaje('Usuario creado correctamente.');
-        setNuevo({ username: '', email: '', password: '' });
+        setNuevo({ username:'', email:'', password:'' });
         cargarUsuarios();
       } else {
         const data = await res.json();
@@ -109,22 +160,22 @@ function Administracion() {
 
   const handleCambioPassword = async () => {
     if (!modal.newPassword) {
-      setError("Introduce nueva contraseña");
-      return;
+      setError("Introduce nueva contraseña"); return;
     }
     try {
       const token = await refreshTokenIfNeeded();
       const res = await fetch(`${API_BASE}/cambiar_password/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: {
+          'Content-Type':'application/json',
+          Authorization:`Bearer ${token}`
+        },
         body: JSON.stringify({ user_id: modal.id, new_password: modal.newPassword })
       });
       if (res.ok) {
         setMensaje('Contraseña actualizada');
-        setModal({ abierto: false, id: null, username: '', newPassword: '' });
-      } else {
-        setError('Error al cambiar contraseña');
-      }
+        setModal({ abierto:false, id:null, username:'', newPassword:'' });
+      } else setError('Error al cambiar contraseña');
     } catch {
       setError('Error de conexión');
     }
@@ -135,37 +186,27 @@ function Administracion() {
       const token = await refreshTokenIfNeeded();
       const res = await fetch(`${API_BASE}/usuarios/${modalEliminar.id}/`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization:`Bearer ${token}` }
       });
       if (res.ok) {
         setMensaje('Usuario eliminado correctamente.');
-        setModalEliminar({ abierto: false, id: null, email: '', confirmEmail: '' });
+        setModalEliminar({ abierto:false, id:null, email:'', confirmEmail:'' });
         cargarUsuarios();
-      } else {
-        setError('Error al eliminar usuario');
-      }
+      } else setError('Error al eliminar usuario');
     } catch {
       setError('Error de conexión');
     }
   };
 
-  const estadoTexto = v => v === 'nueva' ? 'Nueva' : v === 'en_curso' ? 'En curso' : 'Cerrada';
-  const estadoClase = v => v === 'nueva' ? 'bg-danger text-white'
-                        : v === 'en_curso' ? 'bg-warning text-dark'
-                        : 'bg-success text-white';
-
-  const resetFiltros = () => {
-    setFilterType('');
-    setFilterValue('');
-    setPaginaIncidencias(1);
-  };
+  if (loadingInc) return <p>Cargando incidencias…</p>;
+  if (errorInc)   return <div className="alert alert-danger">{errorInc}</div>;
 
   return (
     <div className="container mt-4">
       <h2>Panel de Administración</h2>
 
       <div className="alert alert-info mt-4">
-        Tienes <strong>{nuevas}</strong> incidencias nuevas.
+        Tienes <strong>{nuevasCount}</strong> incidencias nuevas.
       </div>
 
       <div className="card mt-3 p-3">
@@ -180,7 +221,7 @@ function Administracion() {
                 name="username"
                 placeholder="Usuario"
                 value={nuevo.username}
-                onChange={e => setNuevo({...nuevo, username: e.target.value})}
+                onChange={e=>setNuevo({...nuevo,username:e.target.value})}
                 required
               />
             </div>
@@ -190,7 +231,7 @@ function Administracion() {
                 name="email"
                 placeholder="Correo"
                 value={nuevo.email}
-                onChange={e => setNuevo({...nuevo, email: e.target.value})}
+                onChange={e=>setNuevo({...nuevo,email:e.target.value})}
                 required
               />
             </div>
@@ -201,7 +242,7 @@ function Administracion() {
                 type="password"
                 placeholder="Contraseña"
                 value={nuevo.password}
-                onChange={e => setNuevo({...nuevo, password: e.target.value})}
+                onChange={e=>setNuevo({...nuevo,password:e.target.value})}
                 required
               />
             </div>
@@ -219,37 +260,40 @@ function Administracion() {
             </tr>
           </thead>
           <tbody>
-            {usuarios.map(u => (
+            {usuarios.map(u=>(
               <tr key={u.id}>
                 <td>{u.username}</td>
                 <td>{u.email}</td>
-                <td>{u.is_superuser ? '✔️' : '❌'}</td>
+                <td>{u.is_superuser?'✔️':'❌'}</td>
                 <td>
                   <button
                     className="btn btn-outline-primary btn-sm me-2"
-                    onClick={() => setModal({ abierto: true, id: u.id, username: u.username, newPassword: '' })}
-                  >Cambiar contraseña</button>
+                    onClick={()=>setModal({ abierto:true, id:u.id, username:u.username, newPassword:'' })}
+                  >
+                    Cambiar contraseña
+                  </button>
                   <button
                     className="btn btn-outline-danger btn-sm"
-                    onClick={() => setModalEliminar({ abierto: true, id: u.id, email: u.email, confirmEmail: '' })}
-                  >Eliminar</button>
+                    onClick={()=>setModalEliminar({ abierto:true, id:u.id, email:u.email, confirmEmail:'' })}
+                  >
+                    Eliminar
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-
         <div className="text-center my-3">
           <button
             className="btn btn-outline-secondary mx-1"
-            disabled={paginaUsuarios <= 1}
-            onClick={() => setPaginaUsuarios(paginaUsuarios - 1)}
+            disabled={paginaUsuarios<=1}
+            onClick={()=>setPaginaUsuarios(paginaUsuarios-1)}
           >◀</button>
           Página {paginaUsuarios} de {totalPaginasUsuarios}
           <button
             className="btn btn-outline-secondary mx-1"
-            disabled={paginaUsuarios >= totalPaginasUsuarios}
-            onClick={() => setPaginaUsuarios(paginaUsuarios + 1)}
+            disabled={paginaUsuarios>=totalPaginasUsuarios}
+            onClick={()=>setPaginaUsuarios(paginaUsuarios+1)}
           >▶</button>
         </div>
       </div>
@@ -258,104 +302,109 @@ function Administracion() {
         <h4>Gestión de Incidencias</h4>
         {incidenciaSeleccionada ? (
           <>
-            <button className="btn btn-secondary mb-3"
-              onClick={() => setIncidenciaSeleccionada(null)}>⬅ Volver</button>
-            <GestionarIncidencia incidencia={incidenciaSeleccionada} onActualizada={cargarIncidencias}/>
+            <button
+              className="btn btn-secondary mb-3"
+              onClick={()=>setIncidenciaSeleccionada(null)}
+            >⬅ Volver</button>
+            <GestionarIncidencia
+              incidencia={incidenciaSeleccionada}
+              onActualizada={cargarAllIncidencias}
+            />
           </>
         ) : (
           <>
-            <div className="row g-2 mb-3 align-items-end">
-              <div className="col-md-3">
-                <label>Filtrar por:</label>
+            <div className="row mb-4">
+              <div className="col-md-4">
+                <label>Agrupar por:</label>
                 <select
                   className="form-select"
-                  value={filterType}
-                  onChange={e => {
-                    setFilterType(e.target.value);
-                    setFilterValue('');
-                    setPaginaIncidencias(1);
-                  }}
+                  value={groupBy}
+                  onChange={e=>setGroupBy(e.target.value)}
                 >
-                  <option value="">—</option>
-                  <option value="centro">Centro</option>
                   <option value="estado">Estado</option>
-                  <option value="antiguedad">Antigüedad</option>
+                  <option value="centro">Centro</option>
                 </select>
-              </div>
-              <div className="col-md-3">
-                <label>Valor:</label>
-                <select
-                  className="form-select"
-                  value={filterValue}
-                  onChange={e => {
-                    setFilterValue(e.target.value);
-                    setPaginaIncidencias(1);
-                  }}
-                  disabled={!filterType}
-                >
-                  <option value="">—</option>
-                  {filterType === 'centro' && CENTROS.map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                  {filterType === 'estado' && (
-                    <>
-                      <option value="nueva">Nueva</option>
-                      <option value="en_curso">En curso</option>
-                      <option value="cerrada">Cerrada</option>
-                    </>
-                  )}
-                  {filterType === 'antiguedad' && (
-                    <>
-                      <option value="mas_reciente">Más recientes primero</option>
-                      <option value="mas_antiguo">Más antiguas primero</option>
-                    </>
-                  )}
-                </select>
-              </div>
-              <div className="col-md-3 text-end">
-                <button
-                  className="btn btn-primary w-100"
-                  onClick={() => setPaginaIncidencias(1)}
-                >
-                  Aplicar filtros
-                </button>
-              </div>
-              <div className="col-md-3 text-end">
-                <button className="btn btn-outline-secondary w-100" onClick={resetFiltros}>
-                  Reset filtros
-                </button>
               </div>
             </div>
 
-            {incidencias.map(inc => (
-              <div key={inc.id}
-                className={`card my-2 shadow-sm ${estadoClase(inc.estado)}`}
-                style={{ cursor: 'pointer' }}
-                onClick={() => setIncidenciaSeleccionada(inc)}
-              >
-                <div className="card-body">
-                  <h5>{inc.descripcion}</h5>
-                  <p>
-                    <strong>Centro:</strong> {inc.centro} —{' '}
-                    <strong>Estado:</strong> {estadoTexto(inc.estado)}
-                  </p>
+            {grupos.map(({ key, title }) => {
+              const list = allIncidencias.filter(i =>
+                groupBy==='estado'
+                  ? i.estado === key
+                  : i.centro === key
+              );
+              const total    = list.length;
+              const totalPag = total>0 ? Math.ceil(total/pageSize) : 1;
+              const page     = pagesByGroup[key] || 1;
+              const vacio    = total===0;
+              const items    = list.slice((page-1)*pageSize, page*pageSize);
+
+              return (
+                <div key={key} className="mt-4">
+                  <h5 className="text-primary">{title}</h5>
+
+                  {vacio ? (
+                    <>
+                      <p className="text-muted">
+                        No hay incidencias {title.toLowerCase()}.
+                      </p>
+                      <p>Página 0 de 0</p>
+                    </>
+                  ) : (
+                    <>
+                      {items.map(inc=>(
+                        <div
+                          key={inc.id}
+                          className={`card my-2 shadow-sm ${estadoClase(inc.estado)}`}
+                          style={{ cursor:'pointer' }}
+                          onClick={()=>setIncidenciaSeleccionada(inc)}
+                        >
+                          <div className="card-body">
+                            <h5>{inc.descripcion}</h5>
+                            <p>
+                              <strong>Centro:</strong> {inc.centro}<br/>
+                              <strong>Fecha:</strong> {new Date(inc.fecha_creacion).toLocaleString()}<br/>
+                              <strong>Prioridad:</strong> {inc.prioridad}<br/>
+                              <strong>Estado:</strong> {estadoTexto(inc.estado)}<br/>
+                              {renderCamposTipo(inc)}
+                              {inc.observaciones && <>
+                                <br/><strong>Observaciones:</strong> {inc.observaciones}
+                              </>}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+
+                      <div className="d-flex justify-content-between align-items-center">
+                        <button
+                          className="btn btn-secondary"
+                          disabled={page<=1}
+                          onClick={()=>
+                            setPagesByGroup(d=>({
+                              ...d,
+                              [key]: page-1
+                            }))
+                          }
+                        >Anterior</button>
+
+                        <span>Página {page} de {totalPag}</span>
+
+                        <button
+                          className="btn btn-secondary"
+                          disabled={page>=totalPag}
+                          onClick={()=>
+                            setPagesByGroup(d=>({
+                              ...d,
+                              [key]: page+1
+                            }))
+                          }
+                        >Siguiente</button>
+                      </div>
+                    </>
+                  )}
                 </div>
-              </div>
-            ))}
-
-            <div className="text-center my-3">
-              <button
-                className="btn btn-outline-secondary mx-1"
-                disabled={paginaIncidencias <= 1}
-                onClick={() => setPaginaIncidencias(paginaIncidencias - 1)}
-              >◀</button>
-              Página {paginaIncidencias} de {totalPaginasIncidencias}
-              <button
-                className="btn btn-outline-secondary mx-1"
-                disabled={paginaIncidencias >= totalPaginasIncidencias}
-                onClick={() => setPaginaIncidencias(paginaIncidencias + 1)}
-              >▶</button>
-            </div>
+              );
+            })}
           </>
         )}
       </div>
@@ -370,13 +419,16 @@ function Administracion() {
                 className="form-control mt-3"
                 placeholder="Nueva contraseña"
                 value={modal.newPassword}
-                onChange={e => setModal({...modal, newPassword: e.target.value})}
+                onChange={e=>setModal({...modal,newPassword:e.target.value})}
               />
               <div className="mt-3 text-end">
-                <button className="btn btn-secondary me-2"
-                  onClick={() => setModal({ abierto: false })}>Cancelar</button>
-                <button className="btn btn-success"
-                  onClick={handleCambioPassword}>Guardar</button>
+                <button
+                  className="btn btn-secondary me-2"
+                  onClick={()=>setModal({ abierto:false, id:null, username:'', newPassword:'' })}
+                >Cancelar</button>
+                <button className="btn btn-success" onClick={handleCambioPassword}>
+                  Guardar
+                </button>
               </div>
             </div>
           </div>
@@ -395,18 +447,18 @@ function Administracion() {
                 type="email"
                 className="form-control"
                 value={modalEliminar.confirmEmail}
-                onChange={e => setModalEliminar({...modalEliminar, confirmEmail: e.target.value})}
+                onChange={e=>setModalEliminar({...modalEliminar,confirmEmail:e.target.value})}
               />
               <div className="mt-3 text-end">
-                <button className="btn btn-secondary me-2"
-                  onClick={() => setModalEliminar({ abierto: false, id: null, email: '', confirmEmail: '' })}>
-                  Cancelar
-                </button>
-                <button className="btn btn-danger"
-                  disabled={modalEliminar.confirmEmail !== modalEliminar.email}
-                  onClick={handleEliminarUsuario}>
-                  Eliminar usuario
-                </button>
+                <button
+                  className="btn btn-secondary me-2"
+                  onClick={()=>setModalEliminar({ abierto:false, id:null, email:'', confirmEmail:'' })}
+                >Cancelar</button>
+                <button
+                  className="btn btn-danger"
+                  disabled={modalEliminar.confirmEmail!==modalEliminar.email}
+                  onClick={handleEliminarUsuario}
+                >Eliminar usuario</button>
               </div>
             </div>
           </div>
