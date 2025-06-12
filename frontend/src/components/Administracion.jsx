@@ -47,22 +47,25 @@ function Administracion() {
   const cargarIncidencias = async () => {
     try {
       const token = await refreshTokenIfNeeded();
-      const params = new URLSearchParams({ page: paginaIncidencias.toString() });
+      const params = new URLSearchParams();
+      params.set('page', paginaIncidencias.toString());
+      params.set('page_size', '5');
 
       if (filterType === 'centro' && filterValue) {
-        params.append('centro', filterValue);
+        params.set('centro', filterValue);
       }
       if (filterType === 'estado' && filterValue) {
-        params.append('estado', filterValue);
+        params.set('estado', filterValue);
       }
       if (filterType === 'antiguedad' && filterValue) {
-        params.append('ordering', filterValue === 'mas_reciente'
-          ? '-fecha_creacion'
-          : 'fecha_creacion'
+        params.set(
+          'ordering',
+          filterValue === 'mas_reciente' ? '-fecha_creacion' : 'fecha_creacion'
         );
       }
 
-      const res = await fetch(`${API_BASE}/incidencias/?${params.toString()}`, {
+      const url = `${API_BASE}/incidencias/?${params.toString()}`;
+      const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -147,7 +150,9 @@ function Administracion() {
   };
 
   const estadoTexto = v => v === 'nueva' ? 'Nueva' : v === 'en_curso' ? 'En curso' : 'Cerrada';
-  const estadoClase = v => v === 'nueva' ? 'bg-danger text-white' : v === 'en_curso' ? 'bg-warning text-dark' : 'bg-success text-white';
+  const estadoClase = v => v === 'nueva' ? 'bg-danger text-white'
+                        : v === 'en_curso' ? 'bg-warning text-dark'
+                        : 'bg-success text-white';
 
   const resetFiltros = () => {
     setFilterType('');
@@ -265,7 +270,11 @@ function Administracion() {
                 <select
                   className="form-select"
                   value={filterType}
-                  onChange={e => { setFilterType(e.target.value); setFilterValue(''); setPaginaIncidencias(1); }}
+                  onChange={e => {
+                    setFilterType(e.target.value);
+                    setFilterValue('');
+                    setPaginaIncidencias(1);
+                  }}
                 >
                   <option value="">—</option>
                   <option value="centro">Centro</option>
@@ -278,7 +287,10 @@ function Administracion() {
                 <select
                   className="form-select"
                   value={filterValue}
-                  onChange={e => setFilterValue(e.target.value)}
+                  onChange={e => {
+                    setFilterValue(e.target.value);
+                    setPaginaIncidencias(1);
+                  }}
                   disabled={!filterType}
                 >
                   <option value="">—</option>
@@ -303,7 +315,7 @@ function Administracion() {
               <div className="col-md-3 text-end">
                 <button
                   className="btn btn-primary w-100"
-                  onClick={() => { setPaginaIncidencias(1); }}
+                  onClick={() => setPaginaIncidencias(1)}
                 >
                   Aplicar filtros
                 </button>
