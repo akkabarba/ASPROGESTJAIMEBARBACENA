@@ -3,6 +3,12 @@ import GestionarIncidencia from './GestionarIncidencia';
 import { refreshTokenIfNeeded } from '../utils/auth';
 import API_BASE from '../utils/config';
 
+const CENTROS = [
+  'CENTRAL','CPM I','CPM II','RGA III','CPM IV',
+  'DISL V','CPM VII','CPM X','ISL XI','ISL XII',
+  'ISL XIII','CAL XIV','CPM XV'
+];
+
 function Administracion() {
   const [usuarios, setUsuarios] = useState([]);
   const [incidencias, setIncidencias] = useState([]);
@@ -17,11 +23,13 @@ function Administracion() {
   const [paginaIncidencias, setPaginaIncidencias] = useState(1);
   const [totalPaginasIncidencias, setTotalPaginasIncidencias] = useState(1);
 
+  const [filterType, setFilterType] = useState('');
+  const [filterValue, setFilterValue] = useState('');
+
   const [modal, setModal] = useState({ abierto: false, id: null, username: '', newPassword: '' });
   const [modalEliminar, setModalEliminar] = useState({ abierto: false, id: null, email: '', confirmEmail: '' });
   const [incidenciaSeleccionada, setIncidenciaSeleccionada] = useState(null);
 
-  // Carga usuarios paginados
   const cargarUsuarios = async () => {
     try {
       const token = await refreshTokenIfNeeded();
@@ -36,25 +44,34 @@ function Administracion() {
     }
   };
 
-  // Carga incidencias paginadas
   const cargarIncidencias = async () => {
     try {
       const token = await refreshTokenIfNeeded();
-      const res = await fetch(`${API_BASE}/incidencias/?page=${paginaIncidencias}`, {
+      const params = new URLSearchParams({ page: paginaIncidencias.toString() });
+      if (filterType === 'centro' && filterValue) params.append('centro', filterValue);
+      if (filterType === 'estado' && filterValue) params.append('estado', filterValue);
+      if (filterType === 'antiguedad' && filterValue) {
+        if (filterValue === 'mas_reciente') params.append('ordering', '-fecha_creacion');
+        else if (filterValue === 'mas_antiguo') params.append('ordering', 'fecha_creacion');
+      }
+      const res = await fetch(`${API_BASE}/incidencias/?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       setIncidencias(data.results);
       setTotalPaginasIncidencias(Math.ceil(data.count / 5));
-      const nuevasInc = (data.results || []).filter(i => i.estado === 'nueva').length;
-      setNuevas(nuevasInc);
+      setNuevas((data.results || []).filter(i => i.estado === 'nueva').length);
     } catch {
       setError("Error al cargar incidencias");
     }
   };
 
   useEffect(() => { cargarUsuarios(); }, [paginaUsuarios]);
-  useEffect(() => { cargarIncidencias(); }, [paginaIncidencias]);
+  useEffect(() => { cargarIncidencias(); }, [
+    paginaIncidencias,
+    filterType,
+    filterValue
+  ]);
 
   const handleCrearUsuario = async (e) => {
     e.preventDefault();
@@ -121,30 +138,32 @@ function Administracion() {
     }
   };
 
-  // Mapea estado a texto legible
   const estadoTexto = (v) => {
     if (v === 'nueva') return 'Nueva';
     if (v === 'en_curso') return 'En curso';
     return 'Cerrada';
   };
 
-  // Determina classes de tarjeta según estado
   const estadoClase = (v) => {
     if (v === 'nueva') return 'bg-danger text-white';
     if (v === 'en_curso') return 'bg-warning text-dark';
     return 'bg-success text-white';
   };
 
+  const resetFiltros = () => {
+    setFilterType('');
+    setFilterValue('');
+    setPaginaIncidencias(1);
+  };
+
   return (
     <div className="container mt-4">
       <h2>Panel de Administración</h2>
 
-      {/* Indicador de nuevas */}
       <div className="alert alert-info mt-4">
         Tienes <strong>{nuevas}</strong> incidencias nuevas.
       </div>
 
-      {/* Crear Usuario */}
       <div className="card mt-3 p-3">
         <h5>Crear nuevo usuario</h5>
         {mensaje && <div className="alert alert-success">{mensaje}</div>}
@@ -174,7 +193,6 @@ function Administracion() {
         </form>
       </div>
 
-      {/* Tabla Usuarios */}
       <div className="mt-5">
         <h4>Usuarios registrados</h4>
         <table className="table table-bordered table-striped mt-3">
@@ -213,7 +231,6 @@ function Administracion() {
         </div>
       </div>
 
-      {/* Gestión de Incidencias */}
       <div className="mt-5">
         <h4>Gestión de Incidencias</h4>
         {incidenciaSeleccionada ? (
@@ -224,6 +241,50 @@ function Administracion() {
           </>
         ) : (
           <>
+            <div className="row g-2 mb-3 align-items-end">
+              <div className="col-md-3">
+                <label>Filtrar por:</label>
+                <select className="form-select"
+                  value={filterType}
+                  onChange={e => { setFilterType(e.target.value); setFilterValue(''); setPaginaIncidencias(1); }}>
+                  <option value="">—</option>
+                  <option value="centro">Centro</option>
+                  <option value="estado">Estado</option>
+                  <option value="antiguedad">Antigüedad</option>
+                </select>
+              </div>
+              <div className="col-md-3">
+                <label>Valor:</label>
+                <select className="form-select"
+                  value={filterValue}
+                  onChange={e => { setFilterValue(e.target.value); setPaginaIncidencias(1); }}
+                  disabled={!filterType}>
+                  <option value="">—</option>
+                  {filterType === 'centro' && CENTROS.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                  {filterType === 'estado' && (
+                    <>
+                      <option value="nueva">Nueva</option>
+                      <option value="en_curso">En curso</option>
+                      <option value="cerrada">Cerrada</option>
+                    </>
+                  )}
+                  {filterType === 'antiguedad' && (
+                    <>
+                      <option value="mas_reciente">Más recientes primero</option>
+                      <option value="mas_antiguo">Más antiguas primero</option>
+                    </>
+                  )}
+                </select>
+              </div>
+              <div className="col-md-3 text-end">
+                <button className="btn btn-outline-secondary w-100" onClick={resetFiltros}>
+                  Reset filtros
+                </button>
+              </div>
+            </div>
+
             {incidencias.map(inc => (
               <div key={inc.id}
                 className={`card my-2 shadow-sm ${estadoClase(inc.estado)}`}
@@ -251,7 +312,6 @@ function Administracion() {
         )}
       </div>
 
-      {/* Modal Cambiar Contraseña */}
       {modal.abierto && (
         <div className="modal d-block bg-dark bg-opacity-50">
           <div className="modal-dialog">
@@ -272,7 +332,6 @@ function Administracion() {
         </div>
       )}
 
-      {/* Modal Eliminar Usuario */}
       {modalEliminar.abierto && (
         <div className="modal d-block bg-dark bg-opacity-50">
           <div className="modal-dialog">
