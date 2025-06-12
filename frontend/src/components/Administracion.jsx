@@ -11,156 +11,71 @@ const CENTROS = [
 
 function Administracion() {
   const [usuarios, setUsuarios] = useState([]);
-  const [nuevo, setNuevo] = useState({ username: '', email: '', password: '' });
+  const [nuevo, setNuevo] = useState({ username:'', email:'', password:'' });
   const [paginaUsuarios, setPaginaUsuarios] = useState(1);
   const [totalPaginasUsuarios, setTotalPaginasUsuarios] = useState(1);
 
-  const [incidencias, setIncidencias] = useState([]);
-  const [nuevas, setNuevas] = useState(0);
+  const [allIncidencias, setAllIncidencias] = useState([]);
+  const [loadingAllIncidencias, setLoadingAllIncidencias] = useState(false);
+  const [errorAllIncidencias, setErrorAllIncidencias] = useState('');
+
   const [paginaIncidencias, setPaginaIncidencias] = useState(1);
-  const [totalPaginasIncidencias, setTotalPaginasIncidencias] = useState(1);
+  const pageSize = 5;
 
   const [filterType, setFilterType] = useState('');
   const [filterValue, setFilterValue] = useState('');
 
-  const [appliedFilterType, setAppliedFilterType] = useState('');
-  const [appliedFilterValue, setAppliedFilterValue] = useState('');
-
-  const [modal, setModal] = useState({ abierto: false, id: null, username: '', newPassword: '' });
-  const [modalEliminar, setModalEliminar] = useState({ abierto: false, id: null, email: '', confirmEmail: '' });
+  const [modal, setModal] = useState({ abierto:false, id:null, username:'', newPassword:'' });
+  const [modalEliminar, setModalEliminar] = useState({ abierto:false, id:null, email:'', confirmEmail:'' });
   const [incidenciaSeleccionada, setIncidenciaSeleccionada] = useState(null);
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
+  const [usuariosNuevas, setUsuariosNuevas] = useState(0);
+
+  useEffect(() => {
+    const loadAll = async () => {
+      setLoadingAllIncidencias(true);
+      try {
+        const token = await refreshTokenIfNeeded();
+        const res = await fetch(`${API_BASE}/incidencias/?page_size=1000`, {
+          headers:{ Authorization:`Bearer ${token}` }
+        });
+        const data = await res.json();
+        setAllIncidencias(data.results ?? data);
+      } catch {
+        setErrorAllIncidencias('Error al cargar incidencias');
+      } finally {
+        setLoadingAllIncidencias(false);
+      }
+    };
+    loadAll();
+  }, []);
 
   const cargarUsuarios = async () => {
     try {
       const token = await refreshTokenIfNeeded();
       const res = await fetch(`${API_BASE}/usuarios/?page=${paginaUsuarios}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers:{ Authorization:`Bearer ${token}` }
       });
       const data = await res.json();
       setUsuarios(data.results);
-      setTotalPaginasUsuarios(Math.ceil(data.count / 5));
+      setTotalPaginasUsuarios(Math.ceil(data.count/5));
     } catch {
       setError("Error al cargar usuarios");
     }
   };
-
-  const cargarIncidencias = async () => {
-    try {
-      const token = await refreshTokenIfNeeded();
-      const params = new URLSearchParams();
-      params.set('page', paginaIncidencias);
-      params.set('page_size', 5);
-
-      if (appliedFilterType === 'centro' && appliedFilterValue) {
-        params.set('centro', appliedFilterValue);
-      }
-      if (appliedFilterType === 'estado' && appliedFilterValue) {
-        params.set('estado', appliedFilterValue);
-      }
-      if (appliedFilterType === 'antiguedad' && appliedFilterValue) {
-        params.set(
-          'ordering',
-          appliedFilterValue === 'mas_reciente'
-            ? '-fecha_creacion'
-            : 'fecha_creacion'
-        );
-      }
-
-      const url = `${API_BASE}/incidencias/?${params.toString()}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      setIncidencias(data.results);
-      setTotalPaginasIncidencias(Math.ceil(data.count / 5));
-      setNuevas(data.results.filter(i => i.estado === 'nueva').length);
-    } catch {
-      setError("Error al cargar incidencias");
-    }
-  };
-
   useEffect(() => { cargarUsuarios(); }, [paginaUsuarios]);
-  useEffect(() => { cargarIncidencias(); }, [paginaIncidencias, appliedFilterType, appliedFilterValue]);
-
-  const handleCrearUsuario = async e => {
-    e.preventDefault();
-    setMensaje(''); setError('');
-    try {
-      const token = await refreshTokenIfNeeded();
-      const res = await fetch(`${API_BASE}/crear_usuario/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(nuevo)
-      });
-      if (res.ok) {
-        setMensaje('Usuario creado correctamente.');
-        setNuevo({ username:'', email:'', password:'' });
-        cargarUsuarios();
-      } else {
-        const data = await res.json();
-        setError(data.error || 'Error al crear usuario');
-      }
-    } catch {
-      setError('Error de conexión');
-    }
-  };
-
-  const handleCambioPassword = async () => {
-    if (!modal.newPassword) {
-      setError("Introduce nueva contraseña");
-      return;
-    }
-    try {
-      const token = await refreshTokenIfNeeded();
-      const res = await fetch(`${API_BASE}/cambiar_password/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ user_id: modal.id, new_password: modal.newPassword })
-      });
-      if (res.ok) {
-        setMensaje('Contraseña actualizada');
-        setModal({ abierto:false, id:null, username:'', newPassword:'' });
-      } else {
-        setError('Error al cambiar contraseña');
-      }
-    } catch {
-      setError('Error de conexión');
-    }
-  };
-
-  const handleEliminarUsuario = async () => {
-    try {
-      const token = await refreshTokenIfNeeded();
-      const res = await fetch(`${API_BASE}/usuarios/${modalEliminar.id}/`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        setMensaje('Usuario eliminado correctamente.');
-        setModalEliminar({ abierto:false, id:null, email:'', confirmEmail:'' });
-        cargarUsuarios();
-      } else {
-        setError('Error al eliminar usuario');
-      }
-    } catch {
-      setError('Error de conexión');
-    }
-  };
 
   const estadoTexto = v =>
-    v === 'nueva'    ? 'Nueva'
-    : v === 'en_curso'? 'En curso'
-    :                   'Cerrada';
-
+    v==='nueva'    ? 'Nueva'
+    : v==='en_curso'? 'En curso'
+    :                'Cerrada';
   const estadoClase = v =>
-    v === 'nueva'     ? 'bg-danger text-white'
-    : v === 'en_curso'? 'bg-warning text-dark'
-    :                    'bg-success text-white';
-
+    v==='nueva'     ? 'bg-danger text-white'
+    : v==='en_curso'? 'bg-warning text-dark'
+    :                 'bg-success text-white';
   const renderCamposTipo = inc => {
-    switch (inc.relativa) {
+    switch(inc.relativa){
       case '1': return <>
         <strong>IMEI:</strong> {inc.imei}<br/>
         <strong>Tipo teléfono:</strong> {inc.tipo_incidencia_telefono}
@@ -186,7 +101,7 @@ function Administracion() {
         <strong>Tipo plataforma:</strong> {inc.tipo_incidencia_plataforma}
       </>;
       case '7': return <>
-        <strong>Trabajador dispositivo:</strong> {inc.trabajador_dispositivo}<br/>
+        <strong>Trabajador disp.:</strong> {inc.trabajador_dispositivo}<br/>
         <strong>Modelo personal:</strong> {inc.modelo_personal}
       </>;
       case '8': return <>
@@ -197,20 +112,97 @@ function Administracion() {
     }
   };
 
+  let filtered = allIncidencias;
+  if(filterType==='centro'    && filterValue) filtered = filtered.filter(i=>i.centro===filterValue);
+  if(filterType==='estado'    && filterValue) filtered = filtered.filter(i=>i.estado===filterValue);
+  if(filterType==='antiguedad'&& filterValue){
+    filtered = filtered.slice().sort((a,b)=>{
+      return filterValue==='mas_reciente'
+        ? new Date(b.fecha_creacion)-new Date(a.fecha_creacion)
+        : new Date(a.fecha_creacion)-new Date(b.fecha_creacion);
+    });
+  }
+  const total = filtered.length;
+  const totalPages = total>0 ? Math.ceil(total/pageSize) : 1;
+  const start = (paginaIncidencias-1)*pageSize;
+  const pageItems = filtered.slice(start, start+pageSize);
+
+  const handleCrearUsuario = async e => {
+    e.preventDefault();
+    setMensaje(''); setError('');
+    try {
+      const token = await refreshTokenIfNeeded();
+      const res = await fetch(`${API_BASE}/crear_usuario/`, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+        body:JSON.stringify(nuevo)
+      });
+      if(res.ok){
+        setMensaje('Usuario creado correctamente.');
+        setNuevo({ username:'', email:'', password:'' });
+        cargarUsuarios();
+      } else {
+        const d = await res.json();
+        setError(d.error||'Error al crear usuario');
+      }
+    } catch {
+      setError('Error de conexión');
+    }
+  };
+
+  const handleCambioPassword = async () => {
+    if(!modal.newPassword){
+      setError("Introduce nueva contraseña");
+      return;
+    }
+    try {
+      const token = await refreshTokenIfNeeded();
+      const res = await fetch(`${API_BASE}/cambiar_password/`, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+        body:JSON.stringify({ user_id:modal.id,new_password:modal.newPassword })
+      });
+      if(res.ok){
+        setMensaje('Contraseña actualizada');
+        setModal({ abierto:false,id:null,username:'',newPassword:'' });
+      } else setError('Error al cambiar contraseña');
+    } catch {
+      setError('Error de conexión');
+    }
+  };
+
+  const handleEliminarUsuario = async () => {
+    try {
+      const token = await refreshTokenIfNeeded();
+      const res = await fetch(`${API_BASE}/usuarios/${modalEliminar.id}/`, {
+        method:'DELETE',
+        headers:{ Authorization:`Bearer ${token}` }
+      });
+      if(res.ok){
+        setMensaje('Usuario eliminado correctamente.');
+        setModalEliminar({ abierto:false,id:null,email:'',confirmEmail:'' });
+        cargarUsuarios();
+      } else setError('Error al eliminar usuario');
+    } catch {
+      setError('Error de conexión');
+    }
+  };
+
   const resetFiltros = () => {
     setFilterType('');
     setFilterValue('');
-    setAppliedFilterType('');
-    setAppliedFilterValue('');
     setPaginaIncidencias(1);
   };
+
+  if(loadingAllIncidencias) return <p>Cargando incidencias…</p>;
+  if(errorAllIncidencias) return <div className="alert alert-danger">{errorAllIncidencias}</div>;
 
   return (
     <div className="container mt-4">
       <h2>Panel de Administración</h2>
 
       <div className="alert alert-info mt-4">
-        Tienes <strong>{nuevas}</strong> incidencias nuevas.
+        Tienes <strong>{filtered.filter(i=>i.estado==='nueva').length}</strong> incidencias nuevas.
       </div>
 
       <div className="card mt-3 p-3">
@@ -220,86 +212,62 @@ function Administracion() {
         <form onSubmit={handleCrearUsuario}>
           <div className="row">
             <div className="col-md-4 mb-2">
-              <input
-                className="form-control"
-                name="username"
-                placeholder="Usuario"
+              <input className="form-control" name="username" placeholder="Usuario"
                 value={nuevo.username}
-                onChange={e => setNuevo({...nuevo,username:e.target.value})}
-                required
-              />
+                onChange={e=>setNuevo({...nuevo,username:e.target.value})}
+                required />
             </div>
             <div className="col-md-4 mb-2">
-              <input
-                className="form-control"
-                name="email"
-                placeholder="Correo"
+              <input className="form-control" name="email" placeholder="Correo"
                 value={nuevo.email}
-                onChange={e => setNuevo({...nuevo,email:e.target.value})}
-                required
-              />
+                onChange={e=>setNuevo({...nuevo,email:e.target.value})}
+                required />
             </div>
             <div className="col-md-4 mb-2">
-              <input
-                className="form-control"
-                name="password"
-                type="password"
-                placeholder="Contraseña"
+              <input className="form-control" name="password" type="password" placeholder="Contraseña"
                 value={nuevo.password}
-                onChange={e => setNuevo({...nuevo,password:e.target.value})}
-                required
-              />
+                onChange={e=>setNuevo({...nuevo,password:e.target.value})}
+                required />
             </div>
           </div>
-          <button className="btn btn-success mt-2" type="submit">
-            Crear usuario
-          </button>
+          <button className="btn btn-success mt-2" type="submit">Crear usuario</button>
         </form>
       </div>
 
       <div className="mt-5">
         <h4>Usuarios registrados</h4>
         <table className="table table-bordered table-striped mt-3">
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Correo</th>
-              <th>Admin</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>Usuario</th><th>Correo</th><th>Admin</th><th>Acciones</th>
+          </tr></thead>
           <tbody>
-            {usuarios.map(u => (
+            {usuarios.map(u=>(
               <tr key={u.id}>
                 <td>{u.username}</td>
                 <td>{u.email}</td>
-                <td>{u.is_superuser ? '✔️':'❌'}</td>
+                <td>{u.is_superuser?'✔️':'❌'}</td>
                 <td>
-                  <button
-                    className="btn btn-outline-primary btn-sm me-2"
-                    onClick={()=>setModal({ abierto:true, id:u.id, username:u.username, newPassword:'' })}
-                  >Cambiar contraseña</button>
-                  <button
-                    className="btn btn-outline-danger btn-sm"
-                    onClick={()=>setModalEliminar({ abierto:true, id:u.id, email:u.email, confirmEmail:'' })}
-                  >Eliminar</button>
+                  <button className="btn btn-outline-primary btn-sm me-2"
+                    onClick={()=>setModal({ abierto:true,id:u.id,username:u.username,newPassword:'' })}>
+                    Cambiar contraseña
+                  </button>
+                  <button className="btn btn-outline-danger btn-sm"
+                    onClick={()=>setModalEliminar({ abierto:true,id:u.id,email:u.email,confirmEmail:'' })}>
+                    Eliminar
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
         <div className="text-center my-3">
-          <button
-            className="btn btn-outline-secondary mx-1"
+          <button className="btn btn-outline-secondary mx-1"
             disabled={paginaUsuarios<=1}
-            onClick={()=>setPaginaUsuarios(paginaUsuarios-1)}
-          >◀</button>
+            onClick={()=>setPaginaUsuarios(paginaUsuarios-1)}>◀</button>
           Página {paginaUsuarios} de {totalPaginasUsuarios}
-          <button
-            className="btn btn-outline-secondary mx-1"
+          <button className="btn btn-outline-secondary mx-1"
             disabled={paginaUsuarios>=totalPaginasUsuarios}
-            onClick={()=>setPaginaUsuarios(paginaUsuarios+1)}
-          >▶</button>
+            onClick={()=>setPaginaUsuarios(paginaUsuarios+1)}>▶</button>
         </div>
       </div>
 
@@ -307,13 +275,11 @@ function Administracion() {
         <h4>Gestión de Incidencias</h4>
         {incidenciaSeleccionada ? (
           <>
-            <button
-              className="btn btn-secondary mb-3"
-              onClick={()=>setIncidenciaSeleccionada(null)}
-            >⬅ Volver</button>
+            <button className="btn btn-secondary mb-3"
+              onClick={()=>setIncidenciaSeleccionada(null)}>⬅ Volver</button>
             <GestionarIncidencia
               incidencia={incidenciaSeleccionada}
-              onActualizada={cargarIncidencias}
+              onActualizada={()=>{}}
             />
           </>
         ) : (
@@ -321,14 +287,9 @@ function Administracion() {
             <div className="row g-2 mb-3 align-items-end">
               <div className="col-md-3">
                 <label>Filtrar por:</label>
-                <select
-                  className="form-select"
+                <select className="form-select"
                   value={filterType}
-                  onChange={e=>{
-                    setFilterType(e.target.value);
-                    setFilterValue('');
-                  }}
-                >
+                  onChange={e=>{ setFilterType(e.target.value); setFilterValue(''); setPaginaIncidencias(1); }}>
                   <option value="">—</option>
                   <option value="centro">Centro</option>
                   <option value="estado">Estado</option>
@@ -337,12 +298,10 @@ function Administracion() {
               </div>
               <div className="col-md-3">
                 <label>Valor:</label>
-                <select
-                  className="form-select"
+                <select className="form-select"
                   value={filterValue}
-                  onChange={e=>setFilterValue(e.target.value)}
-                  disabled={!filterType}
-                >
+                  onChange={e=>{ setFilterValue(e.target.value); setPaginaIncidencias(1); }}
+                  disabled={!filterType}>
                   <option value="">—</option>
                   {filterType==='centro' && CENTROS.map(c=>(
                     <option key={c} value={c}>{c}</option>
@@ -365,28 +324,21 @@ function Administracion() {
               <div className="col-md-3 text-end">
                 <button
                   className="btn btn-primary w-100"
-                  onClick={()=>{
-                    setAppliedFilterType(filterType);
-                    setAppliedFilterValue(filterValue);
-                    setPaginaIncidencias(1);
-                  }}
+                  onClick={()=>{}}
                 >Aplicar filtros</button>
               </div>
               <div className="col-md-3 text-end">
-                <button
-                  className="btn btn-outline-secondary w-100"
-                  onClick={resetFiltros}
-                >Reset filtros</button>
+                <button className="btn btn-outline-secondary w-100" onClick={resetFiltros}>
+                  Reset filtros
+                </button>
               </div>
             </div>
 
-            {incidencias.map(inc=>(
-              <div
-                key={inc.id}
+            {pageItems.map(inc=>(
+              <div key={inc.id}
                 className={`card my-2 shadow-sm ${estadoClase(inc.estado)}`}
-                style={{ cursor:'pointer' }}
-                onClick={()=>setIncidenciaSeleccionada(inc)}
-              >
+                style={{cursor:'pointer'}}
+                onClick={()=>setIncidenciaSeleccionada(inc)}>
                 <div className="card-body">
                   <h5>{inc.descripcion}</h5>
                   <p>
@@ -402,17 +354,13 @@ function Administracion() {
             ))}
 
             <div className="text-center my-3">
-              <button
-                className="btn btn-outline-secondary mx-1"
+              <button className="btn btn-outline-secondary mx-1"
                 disabled={paginaIncidencias<=1}
-                onClick={()=>setPaginaIncidencias(paginaIncidencias-1)}
-              >◀</button>
-              Página {paginaIncidencias} de {totalPaginasIncidencias}
-              <button
-                className="btn btn-outline-secondary mx-1"
-                disabled={paginaIncidencias>=totalPaginasIncidencias}
-                onClick={()=>setPaginaIncidencias(paginaIncidencias+1)}
-              >▶</button>
+                onClick={()=>setPaginaIncidencias(paginaIncidencias-1)}>◀</button>
+              Página {paginaIncidencias} de {totalPages}
+              <button className="btn btn-outline-secondary mx-1"
+                disabled={paginaIncidencias>=totalPages}
+                onClick={()=>setPaginaIncidencias(paginaIncidencias+1)}>▶</button>
             </div>
           </>
         )}
@@ -431,10 +379,10 @@ function Administracion() {
                 onChange={e=>setModal({...modal,newPassword:e.target.value})}
               />
               <div className="mt-3 text-end">
-                <button
-                  className="btn btn-secondary me-2"
-                  onClick={()=>setModal({ abierto:false, id:null, username:'', newPassword:'' })}
-                >Cancelar</button>
+                <button className="btn btn-secondary me-2"
+                  onClick={()=>setModal({abierto:false,id:null,username:'',newPassword:''})}>
+                  Cancelar
+                </button>
                 <button className="btn btn-success" onClick={handleCambioPassword}>
                   Guardar
                 </button>
@@ -458,15 +406,15 @@ function Administracion() {
                 onChange={e=>setModalEliminar({...modalEliminar,confirmEmail:e.target.value})}
               />
               <div className="mt-3 text-end">
-                <button
-                  className="btn btn-secondary me-2"
-                  onClick={()=>setModalEliminar({ abierto:false, id:null, email:'', confirmEmail:'' })}
-                >Cancelar</button>
-                <button
-                  className="btn btn-danger"
+                <button className="btn btn-secondary me-2"
+                  onClick={()=>setModalEliminar({abierto:false,id:null,email:'',confirmEmail:''})}>
+                  Cancelar
+                </button>
+                <button className="btn btn-danger"
                   disabled={modalEliminar.confirmEmail!==modalEliminar.email}
-                  onClick={handleEliminarUsuario}
-                >Eliminar usuario</button>
+                  onClick={handleEliminarUsuario}>
+                  Eliminar usuario
+                </button>
               </div>
             </div>
           </div>
