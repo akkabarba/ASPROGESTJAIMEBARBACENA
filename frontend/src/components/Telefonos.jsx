@@ -183,8 +183,8 @@ function Telefonos() {
                     >
                       <option value="">Selecciona centro...</option>
                       {[
-                        'CENTRAL','CPM I','CPM II','RGA III','CPM IV','DISL V',
-                        'CPM VII','CPM X','ISL XI','ISL XII','ISL XIII','CAL XIV','CPM XV'
+                        'CENTRAL','CPM I','CPM II','RGA III','CPM IV','OISL V',
+                        'CPM VII','CPM X','ISL XI','ISL XII','ISL XIII','CAI XIV','CPM XV'
                       ].map(opt => (
                         <option key={opt} value={opt}>{opt}</option>
                       ))}
@@ -266,8 +266,8 @@ function Telefonos() {
                         >
                           <option value="">Selecciona centro...</option>
                           {[
-                            'CENTRAL','CPM I','CPM II','RGA III','CPM IV','DISL V',
-                            'CPM VII','CPM X','ISL XI','ISL XII','ISL XIII','CAL XIV','CPM XV'
+                            'CENTRAL','CPM I','CPM II','RGA III','CPM IV','OISL V',
+                            'CPM VII','CPM X','ISL XI','ISL XII','ISL XIII','CAI XIV','CPM XV'
                           ].map(opt => (
                             <option key={opt} value={opt}>{opt}</option>
                           ))}

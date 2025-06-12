@@ -13,8 +13,8 @@ const initialForm = {
 
 const CENTROS = [
   'CENTRAL','CPM I','CPM II','RGA III','CPM IV',
-  'DISL V','CPM VII','CPM X','ISL XI','ISL XII',
-  'ISL XIII','CAL XIV','CPM XV'
+  'OISL V','CPM VII','CPM X','ISL XI','ISL XII',
+  'ISL XIII','CAI XIV','CPM XV'
 ];
 
 function Impresoras() {
