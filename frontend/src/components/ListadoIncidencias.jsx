@@ -24,12 +24,18 @@ function ListadoIncidencias({ usuario }) {
       setLoadingAll(true);
       try {
         const token = await refreshTokenIfNeeded();
-        const res = await fetch(`${API_BASE}/incidencias/?page_size=1000`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error();
-        const json = await res.json();
-        setAll(json.results ?? json);
+        let url = new URL(`${API_BASE}/incidencias/`);
+        let fetched = [];
+        while (url) {
+          const res = await fetch(url.toString(), {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!res.ok) throw new Error();
+          const json = await res.json();
+          fetched = fetched.concat(json.results ?? []);
+          url = json.next ? new URL(json.next) : null;
+        }
+        setAll(fetched);
       } catch {
         setErrorAll('Error al cargar incidencias');
       } finally {
@@ -99,14 +105,11 @@ function ListadoIncidencias({ usuario }) {
 
         let page, setPage;
         if (clave === 'nueva') {
-          page    = pageNueva;
-          setPage = setPageNueva;
+          page = pageNueva;   setPage = setPageNueva;
         } else if (clave === 'en_curso') {
-          page    = pageEnCurso;
-          setPage = setPageEnCurso;
+          page = pageEnCurso; setPage = setPageEnCurso;
         } else {
-          page    = pageCerrada;
-          setPage = setPageCerrada;
+          page = pageCerrada; setPage = setPageCerrada;
         }
 
         const start = (page - 1) * pageSize;
