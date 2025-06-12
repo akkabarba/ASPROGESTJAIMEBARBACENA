@@ -128,11 +128,11 @@ function Administracion() {
     ));
   }
 
-  const pageSize = filtered.length || 1; 
-  const total = filtered.length;
-  const totalPages = total > 0 ? Math.ceil(total / pageSize) : 1;
-  const start = (paginaIncidencias - 1) * pageSize;
-  const pageItems = filtered.slice(start, start + pageSize);
+  const PAGE_SIZE = 5;
+  const totalInc = filtered.length;
+  const totalPages = totalInc > 0 ? Math.ceil(totalInc / PAGE_SIZE) : 1;
+  const startIdx = (paginaIncidencias - 1) * PAGE_SIZE;
+  const pageItems = filtered.slice(startIdx, startIdx + PAGE_SIZE);
 
   const handleCrearUsuario = async e => {
     e.preventDefault();
@@ -220,7 +220,7 @@ function Administracion() {
       <h2>Panel de Administración</h2>
 
       <div className="alert alert-info mt-4">
-        Tienes <strong>{filtered.filter(i=>i.estado==='nueva').length}</strong> incidencias nuevas.
+        Tienes <strong>{filtered.filter(i => i.estado === 'nueva').length}</strong> incidencias nuevas.
       </div>
 
       <div className="card mt-3 p-3">
@@ -232,19 +232,19 @@ function Administracion() {
             <div className="col-md-4 mb-2">
               <input className="form-control" name="username" placeholder="Usuario"
                 value={nuevo.username}
-                onChange={e=>setNuevo({...nuevo,username:e.target.value})}
+                onChange={e => setNuevo({ ...nuevo, username: e.target.value })}
                 required />
             </div>
             <div className="col-md-4 mb-2">
               <input className="form-control" name="email" placeholder="Correo"
                 value={nuevo.email}
-                onChange={e=>setNuevo({...nuevo,email:e.target.value})}
+                onChange={e => setNuevo({ ...nuevo, email: e.target.value })}
                 required />
             </div>
             <div className="col-md-4 mb-2">
               <input className="form-control" name="password" type="password" placeholder="Contraseña"
                 value={nuevo.password}
-                onChange={e=>setNuevo({...nuevo,password:e.target.value})}
+                onChange={e => setNuevo({ ...nuevo, password: e.target.value })}
                 required />
             </div>
           </div>
@@ -261,18 +261,18 @@ function Administracion() {
             </tr>
           </thead>
           <tbody>
-            {usuarios.map(u=>(
+            {usuarios.map(u => (
               <tr key={u.id}>
                 <td>{u.username}</td>
                 <td>{u.email}</td>
-                <td>{u.is_superuser?'✔️':'❌'}</td>
+                <td>{u.is_superuser ? '✔️' : '❌'}</td>
                 <td>
                   <button className="btn btn-outline-primary btn-sm me-2"
-                    onClick={()=>setModal({ abierto:true,id:u.id,username:u.username,newPassword:'' })}>
+                    onClick={() => setModal({ abierto: true, id: u.id, username: u.username, newPassword: '' })}>
                     Cambiar contraseña
                   </button>
                   <button className="btn btn-outline-danger btn-sm"
-                    onClick={()=>setModalEliminar({ abierto:true,id:u.id,email:u.email,confirmEmail:'' })}>
+                    onClick={() => setModalEliminar({ abierto: true, id: u.id, email: u.email, confirmEmail: '' })}>
                     Eliminar
                   </button>
                 </td>
@@ -282,12 +282,10 @@ function Administracion() {
         </table>
         <div className="text-center my-3">
           <button className="btn btn-outline-secondary mx-1"
-            disabled={paginaUsuarios<=1}
-            onClick={()=>setPaginaUsuarios(paginaUsuarios-1)}>◀</button>
-          Página {paginaUsuarios} de {totalPaginasUsuarios}
-          <button className="btn btn-outline-secondary mx-1"
-            disabled={paginaUsuarios>=totalPaginasUsuarios}
-            onClick={()=>setPaginaUsuarios(paginaUsuarios+1)}>▶</button>
+            disabled={paginaUsuarios <= 1}
+            onClick={() => setPaginaUsuarios(paginaUsuarios - 1)}>◀</button> Página {paginaUsuarios} de {totalPaginasUsuarios} <button className="btn btn-outline-secondary mx-1"
+            disabled={paginaUsuarios >= totalPaginasUsuarios}
+            onClick={() => setPaginaUsuarios(paginaUsuarios + 1)}>▶</button>
         </div>
       </div>
 
@@ -296,8 +294,8 @@ function Administracion() {
         {incidenciaSeleccionada ? (
           <>
             <button className="btn btn-secondary mb-3"
-              onClick={()=>setIncidenciaSeleccionada(null)}>⬅ Volver</button>
-            <GestionarIncidencia incidencia={incidenciaSeleccionada} onActualizada={()=>{}}/>
+              onClick={() => setIncidenciaSeleccionada(null)}>⬅ Volver</button>
+            <GestionarIncidencia incidencia={incidenciaSeleccionada} onActualizada={() => {}}/>
           </>
         ) : (
           <>
@@ -306,7 +304,7 @@ function Administracion() {
                 <label>Filtrar por:</label>
                 <select className="form-select"
                   value={pendingType}
-                  onChange={e=>{ setPendingType(e.target.value); setPendingValue(''); setPaginaIncidencias(1); }}>
+                  onChange={e => { setPendingType(e.target.value); setPendingValue(''); setPaginaIncidencias(1); }}>
                   <option value="">—</option>
                   <option value="centro">Centro</option>
                   <option value="estado">Estado</option>
@@ -317,20 +315,20 @@ function Administracion() {
                 <label>Valor:</label>
                 <select className="form-select"
                   value={pendingValue}
-                  onChange={e=>setPendingValue(e.target.value)}
+                  onChange={e => setPendingValue(e.target.value)}
                   disabled={!pendingType}>
                   <option value="">—</option>
-                  {pendingType==='centro' && CENTROS.map(c=>(
+                  {pendingType === 'centro' && CENTROS.map(c => (
                     <option key={c} value={c}>{c}</option>
                   ))}
-                  {pendingType==='estado' && (
+                  {pendingType === 'estado' && (
                     <>
                       <option value="nueva">Nueva</option>
                       <option value="en_curso">En curso</option>
                       <option value="cerrada">Cerrada</option>
                     </>
                   )}
-                  {pendingType==='antiguedad' && (
+                  {pendingType === 'antiguedad' && (
                     <>
                       <option value="mas_reciente">Más recientes</option>
                       <option value="mas_antiguo">Más antiguas</option>
@@ -339,22 +337,18 @@ function Administracion() {
                 </select>
               </div>
               <div className="col-md-3 text-end">
-                <button className="btn btn-primary w-100" onClick={applyFilters}>
-                  Aplicar filtros
-                </button>
+                <button className="btn btn-primary w-100" onClick={applyFilters}>Aplicar filtros</button>
               </div>
               <div className="col-md-3 text-end">
-                <button className="btn btn-outline-secondary w-100" onClick={resetFiltros}>
-                  Reset filtros
-                </button>
+                <button className="btn btn-outline-secondary w-100" onClick={resetFiltros}>Reset filtros</button>
               </div>
             </div>
 
-            {pageItems.map(inc=>(
+            {pageItems.map(inc => (
               <div key={inc.id}
                 className={`card my-2 shadow-sm ${estadoClase(inc.estado)}`}
-                style={{cursor:'pointer'}}
-                onClick={()=>setIncidenciaSeleccionada(inc)}>
+                style={{ cursor: 'pointer' }}
+                onClick={() => setIncidenciaSeleccionada(inc)}>
                 <div className="card-body">
                   <h5>{inc.descripcion}</h5>
                   <p>
@@ -371,12 +365,10 @@ function Administracion() {
 
             <div className="text-center my-3">
               <button className="btn btn-outline-secondary mx-1"
-                disabled={paginaIncidencias<=1}
-                onClick={()=>setPaginaIncidencias(paginaIncidencias-1)}>◀</button>
-              Página {paginaIncidencias} de {totalPages}
-              <button className="btn btn-outline-secondary mx-1"
-                disabled={paginaIncidencias>=totalPages}
-                onClick={()=>setPaginaIncidencias(paginaIncidencias+1)}>▶</button>
+                disabled={paginaIncidencias <= 1}
+                onClick={() => setPaginaIncidencias(paginaIncidencias - 1)}>◀</button> Página {paginaIncidencias} de {totalPages} <button className="btn btn-outline-secondary mx-1"
+                disabled={paginaIncidencias >= totalPages}
+                onClick={() => setPaginaIncidencias(paginaIncidencias + 1)}>▶</button>
             </div>
           </>
         )}
@@ -389,10 +381,10 @@ function Administracion() {
               <h5>Cambiar contraseña de {modal.username}</h5>
               <input type="password" className="form-control mt-3" placeholder="Nueva contraseña"
                 value={modal.newPassword}
-                onChange={e=>setModal({...modal,newPassword:e.target.value})} />
+                onChange={e => setModal({ ...modal, newPassword: e.target.value })} />
               <div className="mt-3 text-end">
                 <button className="btn btn-secondary me-2"
-                  onClick={()=>setModal({abierto:false,id:null,username:'',newPassword:''})}>
+                  onClick={() => setModal({ abierto: false, id: null, username: '', newPassword: '' })}>
                   Cancelar
                 </button>
                 <button className="btn btn-success" onClick={handleCambioPassword}>
@@ -411,14 +403,14 @@ function Administracion() {
               <p className="text-danger mb-2">Escribe el correo completo para confirmarlo:</p>
               <input type="email" className="form-control"
                 value={modalEliminar.confirmEmail}
-                onChange={e=>setModalEliminar({...modalEliminar,confirmEmail:e.target.value})} />
+                onChange={e => setModalEliminar({ ...modalEliminar, confirmEmail: e.target.value })} />
               <div className="mt-3 text-end">
                 <button className="btn btn-secondary me-2"
-                  onClick={()=>setModalEliminar({abierto:false,id:null,email:'',confirmEmail:''})}>
+                  onClick={() => setModalEliminar({ abierto: false, id: null, email: '', confirmEmail: '' })}>
                   Cancelar
                 </button>
                 <button className="btn btn-danger"
-                  disabled={modalEliminar.confirmEmail!==modalEliminar.email}
+                  disabled={modalEliminar.confirmEmail !== modalEliminar.email}
                   onClick={handleEliminarUsuario}>
                   Eliminar usuario
                 </button>
