@@ -38,11 +38,18 @@ function Administracion() {
       setLoadingAllIncidencias(true);
       try {
         const token = await refreshTokenIfNeeded();
-        const res = await fetch(`${API_BASE}/incidencias/?page_size=1000`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
-        setAllIncidencias(data.results ?? data);
+        let url = `${API_BASE}/incidencias/?page_size=100`;
+        let todos = [];
+        while (url) {
+          const res = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await res.json();
+          const items = data.results ?? data;
+          todos = [...todos, ...items];
+          url = data.next;
+        }
+        setAllIncidencias(todos);
       } catch {
         setErrorAllIncidencias('Error al cargar incidencias');
       } finally {
@@ -303,7 +310,7 @@ function Administracion() {
                 <label>Filtrar por:</label>
                 <select className="form-select"
                   value={pendingType}
-                  onChange={e => { setPendingType(e.target.value); setPendingValue(''); setPaginaIncidencias(1); }}>
+                  onChange={e => { setPendingType(e.target.value); setPendingValue(''); }}>
                   <option value="">—</option>
                   <option value="centro">Centro</option>
                   <option value="estado">Estado</option>
