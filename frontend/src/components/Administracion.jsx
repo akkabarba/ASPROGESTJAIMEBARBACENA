@@ -15,9 +15,10 @@ function Administracion() {
   const [paginaUsuarios, setPaginaUsuarios] = useState(1);
   const [totalPaginasUsuarios, setTotalPaginasUsuarios] = useState(1);
 
-  const [allIncidencias, setAllIncidencias] = useState([]);
-  const [loadingAllIncidencias, setLoadingAllIncidencias] = useState(false);
-  const [errorAllIncidencias, setErrorAllIncidencias] = useState('');
+  const [incidencias, setIncidencias] = useState([]);
+  const [totalPaginasIncidencias, setTotalPaginasIncidencias] = useState(1);
+  const [loadingIncidencias, setLoadingIncidencias] = useState(false);
+  const [errorIncidencias, setErrorIncidencias] = useState('');
 
   const [paginaIncidencias, setPaginaIncidencias] = useState(1);
 
@@ -32,25 +33,6 @@ function Administracion() {
 
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const loadAll = async () => {
-      setLoadingAllIncidencias(true);
-      try {
-        const token = await refreshTokenIfNeeded();
-        const res = await fetch(`${API_BASE}/incidencias/?page_size=1000`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
-        setAllIncidencias(data.results ?? data);
-      } catch {
-        setErrorAllIncidencias('Error al cargar incidencias');
-      } finally {
-        setLoadingAllIncidencias(false);
-      }
-    };
-    loadAll();
-  }, []);
 
   useEffect(() => {
     const loadUsuarios = async () => {
@@ -68,6 +50,33 @@ function Administracion() {
     };
     loadUsuarios();
   }, [paginaUsuarios]);
+
+  useEffect(() => {
+    const loadIncidencias = async () => {
+      setLoadingIncidencias(true);
+      try {
+        const token = await refreshTokenIfNeeded();
+        let url = `${API_BASE}/incidencias/?page=${paginaIncidencias}&page_size=5`;
+        if (filterType === 'centro' && filterValue) url += `&centro=${encodeURIComponent(filterValue)}`;
+        if (filterType === 'estado' && filterValue) url += `&estado=${encodeURIComponent(filterValue)}`;
+        if (filterType === 'antiguedad') {
+          const order = filterValue === 'mas_reciente' ? '-fecha_creacion' : 'fecha_creacion';
+          url += `&ordering=${order}`;
+        }
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        setIncidencias(data.results);
+        setTotalPaginasIncidencias(Math.ceil(data.count / 5));
+      } catch {
+        setErrorIncidencias('Error al cargar incidencias');
+      } finally {
+        setLoadingIncidencias(false);
+      }
+    };
+    loadIncidencias();
+  }, [paginaIncidencias, filterType, filterValue]);
 
   const estadoTexto = v =>
     v === 'nueva'    ? 'Nueva'
@@ -116,23 +125,6 @@ function Administracion() {
       default: return null;
     }
   };
-
-  let filtered = allIncidencias;
-  if (filterType === 'centro' && filterValue)    filtered = filtered.filter(i => i.centro === filterValue);
-  if (filterType === 'estado' && filterValue)    filtered = filtered.filter(i => i.estado === filterValue);
-  if (filterType === 'antiguedad' && filterValue) {
-    filtered = filtered.slice().sort((a, b) => (
-      filterValue === 'mas_reciente'
-        ? new Date(b.fecha_creacion) - new Date(a.fecha_creacion)
-        : new Date(a.fecha_creacion) - new Date(b.fecha_creacion)
-    ));
-  }
-
-  const PAGE_SIZE = 5;
-  const totalInc = filtered.length;
-  const totalPages = totalInc > 0 ? Math.ceil(totalInc / PAGE_SIZE) : 1;
-  const startIdx = (paginaIncidencias - 1) * PAGE_SIZE;
-  const pageItems = filtered.slice(startIdx, startIdx + PAGE_SIZE);
 
   const handleCrearUsuario = async e => {
     e.preventDefault();
@@ -212,15 +204,15 @@ function Administracion() {
     setPaginaIncidencias(1);
   };
 
-  if (loadingAllIncidencias) return <p>Cargando incidencias…</p>;
-  if (errorAllIncidencias) return <div className="alert alert-danger">{errorAllIncidencias}</div>;
+  if (loadingIncidencias) return <p>Cargando incidencias…</p>;
+  if (errorIncidencias) return <div className="alert alert-danger">{errorIncidencias}</div>;
 
   return (
     <div className="container mt-4">
       <h2>Panel de Administración</h2>
 
       <div className="alert alert-info mt-4">
-        Tienes <strong>{filtered.filter(i => i.estado === 'nueva').length}</strong> incidencias nuevas.
+        Tienes <strong>{incidencias.filter(i => i.estado === 'nueva').length}</strong> incidencias nuevas.
       </div>
 
       <div className="card mt-3 p-3">
@@ -344,7 +336,7 @@ function Administracion() {
               </div>
             </div>
 
-            {pageItems.map(inc => (
+            {incidencias.map(inc => (
               <div key={inc.id}
                 className={`card my-2 shadow-sm ${estadoClase(inc.estado)}`}
                 style={{ cursor: 'pointer' }}
@@ -366,8 +358,8 @@ function Administracion() {
             <div className="text-center my-3">
               <button className="btn btn-outline-secondary mx-1"
                 disabled={paginaIncidencias <= 1}
-                onClick={() => setPaginaIncidencias(paginaIncidencias - 1)}>◀</button> Página {paginaIncidencias} de {totalPages} <button className="btn btn-outline-secondary mx-1"
-                disabled={paginaIncidencias >= totalPages}
+                onClick={() => setPaginaIncidencias(paginaIncidencias - 1)}>◀</button> Página {paginaIncidencias} de {totalPaginasIncidencias} <button className="btn btn-outline-secondary mx-1"
+                disabled={paginaIncidencias >= totalPaginasIncidencias}
                 onClick={() => setPaginaIncidencias(paginaIncidencias + 1)}>▶</button>
             </div>
           </>
