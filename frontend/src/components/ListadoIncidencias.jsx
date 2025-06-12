@@ -22,20 +22,24 @@ function ListadoIncidencias({ usuario }) {
       ...d,
       [clave]: { ...d[clave], loading: true, error: '' }
     }));
+
     try {
       const token = await refreshTokenIfNeeded();
       const url = new URL(`${API_BASE}/incidencias/`);
       url.searchParams.set('estado', clave);
       url.searchParams.set('page', page);
       url.searchParams.set('page_size', pageSize);
+
       const res = await fetch(url.toString(), {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Error cargando');
+
       const json = await res.json();
       const items = json.results ?? [];
       const total = json.count ?? items.length;
       const totalPages = total > 0 ? Math.ceil(total / pageSize) : 1;
+
       setDataByEstado(d => ({
         ...d,
         [clave]: {
@@ -58,16 +62,14 @@ function ListadoIncidencias({ usuario }) {
   };
 
   useEffect(() => {
-    fetchEstado('nueva', dataByEstado.nueva.page);
-  }, [dataByEstado.nueva.page]);
-
-  useEffect(() => {
-    fetchEstado('en_curso', dataByEstado.en_curso.page);
-  }, [dataByEstado.en_curso.page]);
-
-  useEffect(() => {
-    fetchEstado('cerrada', dataByEstado.cerrada.page);
-  }, [dataByEstado.cerrada.page]);
+    estados.forEach(({ clave }) => {
+      fetchEstado(clave, dataByEstado[clave].page);
+    });
+  }, [
+    dataByEstado.nueva.page,
+    dataByEstado.en_curso.page,
+    dataByEstado.cerrada.page
+  ]);
 
   const renderCamposTipo = (inc) => {
     switch (inc.relativa) {
@@ -124,7 +126,7 @@ function ListadoIncidencias({ usuario }) {
     }
   };
 
-  const estadoTexto = (estado) => {
+  const estadoTexto = estado => {
     if (estado === 'nueva')    return 'Nueva';
     if (estado === 'en_curso') return 'En curso';
     if (estado === 'cerrada')  return 'Cerrada';
@@ -149,9 +151,7 @@ function ListadoIncidencias({ usuario }) {
               <p>Cargando…</p>
             ) : vacio ? (
               <>
-                <p className="text-muted">
-                  No hay incidencias {titulo.toLowerCase()}.
-                </p>
+                <p className="text-muted">No hay incidencias {titulo.toLowerCase()}.</p>
                 <p>Página 0 de 0</p>
               </>
             ) : (

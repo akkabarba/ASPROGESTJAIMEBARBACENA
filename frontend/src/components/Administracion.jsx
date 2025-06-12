@@ -48,12 +48,20 @@ function Administracion() {
     try {
       const token = await refreshTokenIfNeeded();
       const params = new URLSearchParams({ page: paginaIncidencias.toString() });
-      if (filterType === 'centro' && filterValue) params.append('centro', filterValue);
-      if (filterType === 'estado' && filterValue) params.append('estado', filterValue);
-      if (filterType === 'antiguedad' && filterValue) {
-        if (filterValue === 'mas_reciente') params.append('ordering', '-fecha_creacion');
-        else if (filterValue === 'mas_antiguo') params.append('ordering', 'fecha_creacion');
+
+      if (filterType === 'centro' && filterValue) {
+        params.append('centro', filterValue);
       }
+      if (filterType === 'estado' && filterValue) {
+        params.append('estado', filterValue);
+      }
+      if (filterType === 'antiguedad' && filterValue) {
+        params.append('ordering', filterValue === 'mas_reciente'
+          ? '-fecha_creacion'
+          : 'fecha_creacion'
+        );
+      }
+
       const res = await fetch(`${API_BASE}/incidencias/?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -67,7 +75,11 @@ function Administracion() {
   };
 
   useEffect(() => { cargarUsuarios(); }, [paginaUsuarios]);
-  useEffect(() => { cargarIncidencias(); }, [paginaIncidencias]);
+  useEffect(() => { cargarIncidencias(); }, [
+    paginaIncidencias,
+    filterType,
+    filterValue
+  ]);
 
   const handleCrearUsuario = async (e) => {
     e.preventDefault();
@@ -266,7 +278,7 @@ function Administracion() {
                 <select
                   className="form-select"
                   value={filterValue}
-                  onChange={e => { setFilterValue(e.target.value); setPaginaIncidencias(1); }}
+                  onChange={e => setFilterValue(e.target.value)}
                   disabled={!filterType}
                 >
                   <option value="">—</option>
@@ -291,7 +303,7 @@ function Administracion() {
               <div className="col-md-3 text-end">
                 <button
                   className="btn btn-primary w-100"
-                  onClick={() => { setPaginaIncidencias(1); cargarIncidencias(); }}
+                  onClick={() => { setPaginaIncidencias(1); }}
                 >
                   Aplicar filtros
                 </button>
