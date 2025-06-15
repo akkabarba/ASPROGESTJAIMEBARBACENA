@@ -29,6 +29,10 @@ function Administracion() {
   const [modal, setModal] = useState({ abierto: false, id: null, username: '', newPassword: '' });
   const [modalEliminar, setModalEliminar] = useState({ abierto: false, id: null, email: '', confirmEmail: '' });
   const [incidenciaSeleccionada, setIncidenciaSeleccionada] = useState(null);
+  const esEmailValido = correo => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(correo);
+  };
 
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
@@ -141,27 +145,34 @@ function Administracion() {
   const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
   const handleCrearUsuario = async e => {
-    e.preventDefault();
-    setMensaje(''); setError('');
-    try {
-      const token = await refreshTokenIfNeeded();
-      const res = await fetch(`${API_BASE}/crear_usuario/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(nuevo)
-      });
-      if (res.ok) {
-        setMensaje('Usuario creado correctamente.');
-        setNuevo({ username: '', email: '', password: '' });
-        setPaginaUsuarios(1);
-      } else {
-        const d = await res.json();
-        setError(d.error || 'Error al crear usuario');
-      }
-    } catch {
-      setError('Error de conexión');
+  e.preventDefault();
+  setMensaje('');
+  setError('');
+
+  if (!esEmailValido(nuevo.email)) {
+    setError('El correo electrónico no tiene un formato válido');
+    return;
+  }
+
+  try {
+    const token = await refreshTokenIfNeeded();
+    const res = await fetch(`${API_BASE}/crear_usuario/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(nuevo)
+    });
+    if (res.ok) {
+      setMensaje('Usuario creado correctamente.');
+      setNuevo({ username: '', email: '', password: '' });
+      setPaginaUsuarios(1);
+    } else {
+      const d = await res.json();
+      setError(d.error || 'Error al crear usuario');
     }
-  };
+  } catch {
+    setError('Error de conexión');
+  }
+};
 
   const handleCambioPassword = async () => {
     if (!modal.newPassword) {
